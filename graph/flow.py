@@ -1,5 +1,4 @@
-from structure.graph_struct import Graph, GraphNotAimed, Vertex
-# from Algorithm_1.graph import dfs
+from structure.graph_struct import Graph, Vertex
 import math
 
 
@@ -215,14 +214,13 @@ def max_pairs(V1, V2, func=dfs):
     """
     ford fulkerson algorithm For maximum pairing:
 
-
-    @params:
+    :param:
         @G: graph
         @V1,V2: groups of vertex for finding mach
         @func: function to use for find adding way by default is dfs, can be bfs
 
 
-    return: list of vertexes pairs for max pairing (=Original vertices)
+    :return: list of vertexes pairs for max pairing (=Original vertices)
 
     efficiency: O(|E|*n) where n is max pairing, in worst case n=|V1|
     """

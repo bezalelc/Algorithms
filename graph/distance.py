@@ -4,7 +4,6 @@ from structure.heap import BinaryHeap
 from graph.mst import BinaryHeapPrim
 from graph.dfs import topology
 import numpy as np
-import copy
 
 
 def dijkstra(G, s):
@@ -15,15 +14,15 @@ def dijkstra(G, s):
 
         this method work only with positive edges
 
-    @params:
+    :param:
         @G: graph
         @s: vertex to start
 
-    return:
+    :return:
         return pi dict
         if restore=True the mst graph (=Minimal spreadsheet graph) will be return also
 
-    efficiency:
+    :efficiency:
         if |E| * 0.75  < |V|^2: => O(Vlog V)
         if |E| * 0.75  > |V|^2: => O(E) = O(|V|^2)
     """
