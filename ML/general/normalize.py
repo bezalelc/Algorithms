@@ -1,11 +1,9 @@
 import numpy as np
-from matplotlib.pyplot import axis
 
 
 def standard_deviation(data):
     """
     Compute the standard deviation of data
-        this function not normalize the column 0
 
     :param data: numpy array
 
@@ -20,16 +18,15 @@ def standard_deviation(data):
     sigma = np.sqrt(1 / m * np.sum((data - mu) ** 2, axis=0))
     sigma[sigma == 0] = 1  // if sigma[i] == 0 => need to divide by 1 because there is not standard deviation  
     '''
-    mu, sigma = np.mean(data[:, 1:], axis=0), np.std(data[:, 1:], axis=0)
+    mu, sigma = np.mean(data, axis=0), np.std(data, axis=0)
     sigma[sigma == 0] = 1
-    data[:, 1:] = (data[:, 1:] - mu) / sigma
+    data = (data - mu) / sigma
     return data, mu, sigma
 
 
 def simple_normalize(data):
     """
     Compute data between [-1,1]
-        this function not normalize the column 0
 
     :param data: numpy array
 
@@ -38,10 +35,10 @@ def simple_normalize(data):
         max_: numpy array of max in every column (=attribute)
         min_: numpy array of min in every column (=attribute)
     """
-    max_, min_ = np.max(data[:, 1:], axis=0), np.min(data[:, 1:], axis=0)
+    max_, min_ = np.max(data, axis=0), np.min(data, axis=0)
     div = (max_ - min_)
     div[div == 0] = 1
-    data[:, 1:] = (data[:, 1:] - min_) / div
+    data = (data - min_) / div
     return data, max_, min_
 
 

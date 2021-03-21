@@ -1,6 +1,35 @@
-import numpy as np
-from general import load_data, normalize
 import matplotlib.pyplot as plt
+import numpy as np
+
+from general import load_data, normalize
+
+
+# def train(data, theta=None, train_func=None, normalize=None, optimizer=None, num_iter=None):
+#     X, y = data[:, :-1], data[:, -1:]
+#
+#     theta = theta if theta else 0
+
+class LinearRegression():
+
+    def __init__(self) -> None:
+        super().__init__()
+
+
+# --------------------------------------  normal eqn  ---------------------------------------------
+
+def normal_eqn(X, y):
+    """
+
+    :param
+        X: matrix of dataset [x(0).T,x(1).T,...,x(m).T]
+        y: real value for each example (=row) in X
+
+    :return:
+        theta: vector of parameters for the feature
+
+    :efficiency:
+    """
+    return np.linalg.pinv(X.T @ X) @ (X.T @ y)
 
 
 # --------------------------------------  optimizers  ---------------------------------------------
@@ -95,7 +124,7 @@ def adam(X, y, theta, V, G, beta1, beta2, const):
 
 # --------------------------------------  linear regression  ---------------------------------------------
 
-def linear_regression(X, y, theta, alpha=10e-7, num_iter=1000, batch=30, optimizer=simple, optimizer_data=None):
+def regression(X, y, theta, alpha=10e-7, num_iter=1000, batch=30, optimizer=simple, optimizer_data=None):
     """
     linear regression
 
@@ -136,8 +165,8 @@ def linear_regression(X, y, theta, alpha=10e-7, num_iter=1000, batch=30, optimiz
                 epsilon: small number for the fot not divide in zero
 
         adam:
-            V = beta1 * V + (1 - beta1) * '(X*theta[i])
-            G = beta2 * G + (1 - beta2) * '(X*theta[i])^2
+            V = beta1 * V + (1 - beta1) * J'(X*theta[i])
+            G = beta2 * G + (1 - beta2) * J'(X*theta[i])^2
             V, G = 1 / (1 - beta1) * V, 1 / (1 - beta2) * G
             ALPHA = const / np.sqrt(G)
             theta -= ALPHA * V
@@ -154,7 +183,7 @@ def linear_regression(X, y, theta, alpha=10e-7, num_iter=1000, batch=30, optimiz
         theta
         J_history: the history of the cost function
 
-    :efficiency: O(batch*n^2)
+    :efficiency: O(num_iter*batch*n^2)
     """
 
     optimizer_data, data = optimizer_data if optimizer_data else {}, []
@@ -198,21 +227,6 @@ def linear_regression(X, y, theta, alpha=10e-7, num_iter=1000, batch=30, optimiz
     return theta, J_history
 
 
-def normal_eqn(X, y):
-    """
-
-    :param
-        X: matrix of dataset [x(0).T,x(1).T,...,x(m).T]
-        y: real value for each example (=row) in X
-
-    :return:
-        theta: vector of parameters for the feature
-
-    :efficiency:
-    """
-    return np.linalg.pinv(X.T @ X) @ (X.T @ y)
-
-
 def cost(X, y, theta):
     """
     compute the cost of the range between X*theta and y
@@ -249,6 +263,22 @@ def h_theta(X, theta):
     return X @ theta
 
 
+def predict(theta, x, data=None):
+    x = np.array(x, dtype=np.float128)
+    x = np.insert(x, 0, [1, ], axis=0)
+    if not data:
+        return theta @ x
+    elif 'normalize' in data:
+        if data['normalize'] is normalize.standard_deviation:
+            x[1:] = (x[1:] - data['mu']) / data['sigma']
+            return x @ theta
+        elif data['normalize'] is normalize.simple_normalize:
+            x[1:] = (x[1:] - data['min']) / data['max']
+            return x @ theta
+    else:
+        print('need to specified normalize function')
+
+
 # -----------------------------------------  debug function  --------------------------------------------
 def test_ex1data1():
     print('===================================== test ex1data1 =====================================')
@@ -268,7 +298,7 @@ def test_ex1data1():
 
     print('\n-------------------------------  regression  ---------------------------------------')
     theta = np.zeros((X.shape[1], 1))
-    J_history = linear_regression(X, y, theta, alpha=10e-3, num_iter=100000)[1]
+    theta, J_history = regression(X, y, theta, alpha=10e-3, num_iter=100000, batch=X.shape[0])
     print(f'theta={[float(t) for t in theta]}')
     print(f'cost={cost(X, y, theta)}')
 
@@ -286,20 +316,21 @@ def test_ex1data2():
 
     print('\n-------------------------------  normal_eqn  ---------------------------------------')
     theta = np.zeros((X.shape[1], 1))
-    print(f'cost={cost(X, y, theta)} should be 32.072733877455676')
+    print(f'cost={cost(X, y, theta)}')
     theta = normal_eqn(X, y)
-    print(f'theta={[float(t) for t in theta]} should be [ 89597.909542  139.210674  -8738.019112 ]')
+    print(f'theta={[float(t) for t in theta]} should be ]')
     print(f'price={float(np.array([1, 1650, 3]) @ theta)}, should be 293081.464335')
-
+    print(f'cost={cost(X, y, theta)}')
     print('\n-------------------------------  regression with std normalize ---------------------------------------')
     data = load_data.load_from_file('/home/bb/Documents/python/ML/data/ex1data2.txt')
-    X, y = np.insert(data[:, :-1], 0, np.ones((data[:, :-1].shape[0]), dtype=data.dtype), axis=1), data[:, -1:]
-
+    X, y = data[:, :-1], data[:, -1:]
     X, mu, sigma = normalize.standard_deviation(X)
-    theta = np.zeros((X.shape[1], 1))
-    theta, J_history = linear_regression(X, y, theta, alpha=0.01, num_iter=10000, batch=X.shape[0],
-                                         optimizer=simple)
-    print(f'    theta={[float(t) for t in theta]}\nshould be [340412.659574 110631.050279 -6649.474271]')
+    X = np.insert(X, 0, np.ones((X.shape[0]), dtype=X.dtype), axis=1)
+    theta, J_history = regression(X, y, theta, alpha=0.01, num_iter=10000, batch=X.shape[0],
+                                  optimizer=simple)
+    theta_test = normal_eqn(X, y)
+    print(f'theta={[float(t) for t in theta]}\n real={[float(t) for t in theta_test]}\n')
+    print(f'cost={cost(X, y, theta)}\nreal={cost(X, y, theta_test)}')
     # predict
     x = np.array([1, 1650, 3], dtype=np.float64)
     x[1:] = (x[1:] - mu) / sigma
@@ -313,15 +344,16 @@ def test_ex1data2():
 
     print('\n-------------------------------  regression with simple normalize ---------------------------------------')
     data = load_data.load_from_file('/home/bb/Documents/python/ML/data/ex1data2.txt')
-    X, y = np.insert(data[:, :-1], 0, np.ones((data[:, :-1].shape[0]), dtype=data.dtype), axis=1), data[:, -1:]
-
+    X, y = data[:, :-1], data[:, -1:]
     X, max_, min_ = normalize.simple_normalize(X)
+    X = np.insert(X, 0, np.ones((X.shape[0]), dtype=X.dtype), axis=1)
     theta = np.zeros((X.shape[1], 1))
-    J_history = linear_regression(X, y, theta, alpha=10e-1, num_iter=1000, batch=15)[1]
-    print(f'theta={[float(t) for t in theta]}, should be [199467.38469348644, 504777.9039879094, -34952.07644931053]')
+    theta, J_history = regression(X, y, theta, alpha=10e-1, num_iter=10000, batch=X.shape[0])
+    print(f'theta={[float(t) for t in theta]}\nreal= {[float(t) for t in normal_eqn(X, y)]}')
     # predict
-    x = np.array([1, 1650, 3], dtype=np.float64)
-    x[1:] = (x[1:] - min_) / max_
+    x = np.array([1650, 3], dtype=np.float64)
+    x = (x - min_) / max_
+    x = np.insert(x, 0, [1, ], axis=0)
     print(f'price={x @ theta}, should be 293081.464335')
 
     plt.plot(range(len(J_history)), J_history)
@@ -333,22 +365,25 @@ def test_ex1data2():
 
 def test_general(file, func, optimizer=simple, norm=normalize.standard_deviation):
     data = load_data.load_from_file(file)
-    X, y = np.insert(data[:, :-1], 0, np.ones((data[:, :-1].shape[0]), dtype=data.dtype), axis=1), data[:, -1:]
+    X, y = data[:, :-1], data[:, -1:]
 
     print('\n\n===================================== test ex1data2 =====================================')
     print('-------------------------------  regression with momentum---------------------------------------')
-
-    theta = np.zeros((X.shape[1], 1))
     X, mu, sigma = normalize.standard_deviation(X)
-    theta, J_history = func(X, y, theta, alpha=0.001, num_iter=1000, batch=30, optimizer=ada_grad)
-    print(
-        f'    theta={[float(t) for t in theta]}\nshould be [340412.659574 110631.050279 -6649.474271]')
-    print(f'cost={cost(X, y, theta)}')
+    X = np.insert(X, 0, np.ones((X.shape[0]), dtype=X.dtype), axis=1)
+    theta = np.zeros((X.shape[1], 1))
+    theta_test = normal_eqn(X, y)
+    theta, J_history = func(X, y, theta, alpha=0.1, num_iter=1000, batch=40, optimizer=momentum)
+    print(f'theta={[float(t) for t in theta]}\n real={[float(t) for t in theta_test]}\n')
+    print(f'cost={cost(X, y, theta)}\nreal={cost(X, y, theta_test)}')
 
     # predict
-    x = np.array([1, 1650, 3], dtype=np.float64)
-    x[1:] = (x[1:] - mu) / sigma
+    x = np.array([1650, 3], dtype=np.float64)
+    x = (x - mu) / sigma
+    x = np.insert(x, 0, [1, ])
     print(f'price={float(x @ theta)}, should be 293081.464335')
+    print('p=',
+          predict(theta, [1650, 3], data={'normalize': normalize.standard_deviation, 'mu': mu, 'sigma': sigma}))
 
     # plot
     plt.plot(range(len(J_history)), J_history)
@@ -358,7 +393,7 @@ def test_general(file, func, optimizer=simple, norm=normalize.standard_deviation
     plt.show()
 
 
-# -----------------------------------------  debug function  --------------------------------------------
+# -----------------------------------------  main  --------------------------------------------
 
 if __name__ == '__main__':
     """
@@ -372,5 +407,4 @@ if __name__ == '__main__':
 
     # test_ex1data1()
     # test_ex1data2()
-    test_general('/home/bb/Documents/python/ML/data/ex1data2.txt', func=linear_regression)
-    # print(np.array([1, 2, 3]) * np.array([1, 2, 3]))
+    # test_general('/home/bb/Documents/python/ML/data/ex1data2.txt', func=regression)

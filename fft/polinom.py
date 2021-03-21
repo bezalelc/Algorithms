@@ -33,17 +33,16 @@ def mult_(A, B):
 
     :complexity: O(n^2)
     """
-    # x = np.random.randint(low=-len(A) * 8, high=len(A) + len(B), size=len(A) + len(B) - 1)
     x = np.arange(-len(A), len(B) - 1)
-    # print(x)
-    # x=np.array([-1, 0, 1, 2])
-    X = np.vander(x, increasing=True)
-    # print(X)
     y = np.multiply([eval_(A, x) for x in x], [eval_(B, x) for x in x])
-    return np.linalg.solve(X, y)
+    # ev1 = np.vectorize(eval_(A,x_))
+    # ev2 = np.vectorize(eval_())
+    # y_ = np.multiply()
+    # print("--", np.array_equal(y, y_))
+    return interpolation_vandermonde(np.column_stack((x, y)))
 
 
-def mult_2(A, B):
+def mult_coef(A, B):
     """
     multiply to Polynomials that represent by vector of values
         for example: Polynomial A= 1-2x+3x^2 => A=[1,-2,3]
@@ -70,6 +69,56 @@ def mult_2(A, B):
     return C
 
 
+def coef_to_point(X, points):
+    pass
+
+
+def point_to_coef():
+    pass
+
+
+def interpolation_vandermonde(points):
+    """
+    convert the representation of the polynomial from points to coefficients
+    this function work with vandermonde matrix
+
+    for now work only with one var x
+
+    :param:
+        points: (n+1)x2 Matrix of points when Matrix[:,1]=x points and Matrix[:,2] = y points,
+            n is the rank of the polynomial
+
+    :return:
+        vector that represent the coefficients of the polynomial
+
+    :complexity: O(n^3)
+    """
+    points = np.array(points)
+    X = np.vander(points[:, 0], increasing=True)
+    return np.linalg.solve(X, points[:, 1])
+
+
+def interpolation_lagrangh(points):
+    """
+    convert the representation of the polynomial from points to coefficients
+    this function work with lagrangh method
+
+    for now work only with one var x
+
+    :param:
+        points: (n+1)x2 Matrix of points when Matrix[:,1]=x points and Matrix[:,2] = y points,
+            n is the rank of the polynomial
+
+    :return:
+        vector that represent the coefficients of the polynomial
+
+    :complexity: O(n^3)
+    """
+    points = np.array(points)
+    pass
+    # for i in points.shape[0]:
+
+
 if __name__ == '__main__':
     A, B = np.array([0, 0, 0, 1]), np.array([1, 2, 3, 4, 5])
     C, D = np.array([0, 1, 2, 3, 4, 5, 6]), np.array([0, 1, 2, 3, 4, 5, 6])
@@ -81,13 +130,16 @@ if __name__ == '__main__':
     P, Q = np.array([1, -2, 3]), np.array([-4, 2])
     # [1, 2, 0],[-2, -2, 1],[-1, 0, 1, 2],[-2. -6. -3.  2.]
 
-    print(np.round(mult_2(P, Q), 5))
+    print(np.round(mult_coef(P, Q), 5))
 
-    print(np.array_equal(np.round(mult_(A, B), 5), np.round(mult_2(A, B), 5)))
-    print(np.array_equal(np.round(mult_(C, D), 2), np.round(mult_2(C, D), 2)))
-    print(np.array_equal(np.round(mult_(E, F), 5), np.round(mult_2(E, F), 5)))
-    print(np.array_equal(np.round(mult_(G, T), 5), np.round(mult_2(G, T), 5)))
-    print(np.array_equal(np.round(mult_(X, Y), 5), np.round(mult_2(X, Y), 5)))
-    print(np.array_equal(np.round(mult_(V, U), 5), np.round(mult_2(V, U), 5)))
-    print(np.array_equal(np.round(mult_(I, J), 5), np.round(mult_2(I, J), 5)))
-    print(np.array_equal(np.round(mult_(P, Q), 5), np.round(mult_2(P, Q), 5)))
+    print(np.array_equal(np.round(mult_(A, B), 5), np.round(mult_coef(A, B), 5)))
+    print(np.array_equal(np.round(mult_(C, D), 2), np.round(mult_coef(C, D), 2)))
+    print(np.array_equal(np.round(mult_(E, F), 5), np.round(mult_coef(E, F), 5)))
+    print(np.array_equal(np.round(mult_(G, T), 5), np.round(mult_coef(G, T), 5)))
+    print(np.array_equal(np.round(mult_(X, Y), 5), np.round(mult_coef(X, Y), 5)))
+    print(np.array_equal(np.round(mult_(V, U), 5), np.round(mult_coef(V, U), 5)))
+    print(np.array_equal(np.round(mult_(I, J), 5), np.round(mult_coef(I, J), 5)))
+    print(np.array_equal(np.round(mult_(P, Q), 5), np.round(mult_coef(P, Q), 5)))
+
+    points = [(1, 12), (2, 15), (3, 16)]
+    print(interpolation_vandermonde(points))
