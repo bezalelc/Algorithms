@@ -1,4 +1,5 @@
 import numpy as np
+import sympy as sp
 
 
 def eval_(A, x_0):
@@ -18,30 +19,105 @@ def eval_(A, x_0):
     return res
 
 
-def mult_(A, B):
+# ----------------------------  interpolation  -------------------------------------
+
+def interpolation_vandermonde(points):
     """
-    multiply to Polynomials that represent by vector of values
-        for example: Polynomial A= 1-2x+3x^2 => A=[1,-2,3]
-                     Polynomial B= -4+2x     => B=[-4,2]
-                     Polynomial C= A*B= -4+10x-16x^2+6^3 and the return will be: [ -4  10 -16   6]
+    convert the representation of the polynomial from points to coefficients
+    this function work with vandermonde matrix
+
+    for now work only with one var x
 
     :param:
-        @A,B vectors that represent Polynomials
+        points: (n+1)x2 Matrix of points when Matrix[:,1]=x points and Matrix[:,2] = y points,
+            n is the rank of the polynomial
 
     :return:
-        vector of values that represent Polynomial C= A*B
+        vector that represent the coefficients of the polynomial
+
+    :Disadvantages:
+        complexity:
+        compute error: because vandermonde contain number in large range(=1 to x^n)
+
+    :complexity: O((1/3)*n^3)
+    """
+    points = np.array(points)
+    X = np.vander(points[:, 0], increasing=True)
+    return np.linalg.solve(X, points[:, 1])
+
+
+def interpolation_lagrangh(points):
+    """
+    convert the representation of the polynomial from points to coefficients
+    this function work with lagrangh method
+
+    for now work only with one var x
+
+    :param:
+        points: (n+1)x2 Matrix of points when Matrix[:,1]=x points and Matrix[:,2] = y points,
+            n is the rank of the polynomial
+
+    :return:
+        vector that represent the coefficients of the polynomial
 
     :complexity: O(n^2)
     """
-    x = np.arange(-len(A), len(B) - 1)
-    y = np.multiply([eval_(A, x) for x in x], [eval_(B, x) for x in x])
-    # ev1 = np.vectorize(eval_(A,x_))
-    # ev2 = np.vectorize(eval_())
-    # y_ = np.multiply()
-    # print("--", np.array_equal(y, y_))
-    return interpolation_vandermonde(np.column_stack((x, y)))
+
+    points = np.array(points)
+    X, y = points[:, 0], points[:, 1]
+    x = sp.symbols('x')
+    F, numerator = 0, 1
+
+    for x_i in X:
+        numerator *= (x - x_i)
+
+    numerator = sp.factor(numerator)
+    for y, i in zip(y, range(len(X))):
+        f = y * sp.expand(numerator / (x - X[i]))
+        denominator = 1
+        for j in range(len(X)):
+            if j != i:
+                denominator *= (X[i] - X[j])
+        f /= denominator
+        F += f
+
+    return sp.Poly(F, x).all_coeffs()[::-1]
 
 
+def interpolation_newton(points):
+    """
+    convert the representation of the polynomial from points to coefficients
+    this function work with newton method
+
+    for now work only with one var x
+
+    :param:
+        points: (n+1)x2 Matrix of points when Matrix[:,1]=x points and Matrix[:,2] = y points,
+            n is the rank of the polynomial
+
+    :return:
+        vector that represent the coefficients of the polynomial
+
+    :complexity: O(n^2)
+    """
+    points = np.array(points)
+    X, y = points[:, 0], points[:, 1]
+    M = np.insert(np.zeros((points.shape[0], points.shape[0] - 1)), 0, y, axis=1)
+
+    for i in range(M.shape[0]):
+        for j in range(1, i + 1):
+            M[i, j] = (M[i, j - 1] - M[i - 1, j - 1]) / (X[i] - X[i - j])
+
+    x = sp.symbols('x')
+    P, p = M[0, 0], 1
+    for coef, x_i in zip(np.diag(M)[1:], X):
+        p *= (x - x_i)
+        P += coef * p
+
+    return sp.Poly(P, x).all_coeffs()[::-1]
+
+
+# ----------------------------  multiply  -------------------------------------
 def mult_coef(A, B):
     """
     multiply to Polynomials that represent by vector of values
@@ -69,54 +145,28 @@ def mult_coef(A, B):
     return C
 
 
-def coef_to_point(X, points):
-    pass
-
-
-def point_to_coef():
-    pass
-
-
-def interpolation_vandermonde(points):
+def mult_(A, B, interpolation=interpolation_vandermonde):
     """
-    convert the representation of the polynomial from points to coefficients
-    this function work with vandermonde matrix
-
-    for now work only with one var x
+    multiply to Polynomials that represent by vector of values
+        for example: Polynomial A= 1-2x+3x^2 => A=[1,-2,3]
+                     Polynomial B= -4+2x     => B=[-4,2]
+                     Polynomial C= A*B= -4+10x-16x^2+6^3 and the return will be: [ -4  10 -16   6]
 
     :param:
-        points: (n+1)x2 Matrix of points when Matrix[:,1]=x points and Matrix[:,2] = y points,
-            n is the rank of the polynomial
+        @A,B vectors that represent Polynomials
 
     :return:
-        vector that represent the coefficients of the polynomial
+        vector of values that represent Polynomial C= A*B
 
-    :complexity: O(n^3)
+    :complexity: O(n^2)
     """
-    points = np.array(points)
-    X = np.vander(points[:, 0], increasing=True)
-    return np.linalg.solve(X, points[:, 1])
-
-
-def interpolation_lagrangh(points):
-    """
-    convert the representation of the polynomial from points to coefficients
-    this function work with lagrangh method
-
-    for now work only with one var x
-
-    :param:
-        points: (n+1)x2 Matrix of points when Matrix[:,1]=x points and Matrix[:,2] = y points,
-            n is the rank of the polynomial
-
-    :return:
-        vector that represent the coefficients of the polynomial
-
-    :complexity: O(n^3)
-    """
-    points = np.array(points)
-    pass
-    # for i in points.shape[0]:
+    x = np.arange(-len(A), len(B) - 1)
+    y = np.multiply([eval_(A, x) for x in x], [eval_(B, x) for x in x])
+    # ev1 = np.vectorize(eval_(A,x_))
+    # ev2 = np.vectorize(eval_())
+    # y_ = np.multiply()
+    # print("--", np.array_equal(y, y_))
+    return interpolation(np.column_stack((x, y)))
 
 
 if __name__ == '__main__':
@@ -131,7 +181,7 @@ if __name__ == '__main__':
     # [1, 2, 0],[-2, -2, 1],[-1, 0, 1, 2],[-2. -6. -3.  2.]
 
     print(np.round(mult_coef(P, Q), 5))
-
+    print('--------------------  mult polynomials test  ------------------------')
     print(np.array_equal(np.round(mult_(A, B), 5), np.round(mult_coef(A, B), 5)))
     print(np.array_equal(np.round(mult_(C, D), 2), np.round(mult_coef(C, D), 2)))
     print(np.array_equal(np.round(mult_(E, F), 5), np.round(mult_coef(E, F), 5)))
@@ -141,5 +191,18 @@ if __name__ == '__main__':
     print(np.array_equal(np.round(mult_(I, J), 5), np.round(mult_coef(I, J), 5)))
     print(np.array_equal(np.round(mult_(P, Q), 5), np.round(mult_coef(P, Q), 5)))
 
+    print('--------------------  interpolation test  ------------------------')
     points = [(1, 12), (2, 15), (3, 16)]
-    print(interpolation_vandermonde(points))
+    print(np.array_equal(interpolation_vandermonde(points), interpolation_lagrangh(points)))
+    print(np.array_equal(interpolation_vandermonde(points), interpolation_newton(points)))
+    points = [(5, 1), (-7, -23), (-6, -54)]
+    print(np.array_equal(interpolation_vandermonde(points), interpolation_lagrangh(points)))
+    print(np.array_equal(interpolation_vandermonde(points), interpolation_newton(points)))
+    points = [(1, 2), (0, 2), (-1, 4)]
+    print(np.array_equal(interpolation_vandermonde(points), interpolation_lagrangh(points)))
+    print(np.array_equal(interpolation_vandermonde(points), interpolation_newton(points)))
+    points = [(5, 1), (-7, -23), (-6, -54)]
+    print(np.array_equal(interpolation_vandermonde(points), interpolation_lagrangh(points)))
+    print(np.array_equal(interpolation_vandermonde(points), interpolation_newton(points)))
+
+    # interpolation_newton(points)
