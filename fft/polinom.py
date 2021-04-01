@@ -1,5 +1,5 @@
 """
-function for polynomials:
+function for polynomials: (for now only one variable supported)
     interpolation: 1. vandermonde's matrix method
                    2. lagrangh method
                    3. newton method
@@ -7,12 +7,14 @@ function for polynomials:
     Multiplication: 1. point representation
                     2. Coefficients representation
 
+    eval: 1. coefficient representation
+
 """
 import numpy as np
 import sympy as sp
 
 
-def eval_(A, x_0):
+def eval_coefficient(A, x_0):
     """
     eval Polynomial in format
 
@@ -171,7 +173,7 @@ def mult_point(A, B, interpolation=interpolation_vandermonde):
     :complexity: O(n^2)
     """
     x = np.arange(-len(A), len(B) - 1)
-    y = np.multiply([eval_(A, x) for x in x], [eval_(B, x) for x in x])
+    y = np.multiply([eval_coefficient(A, x) for x in x], [eval_coefficient(B, x) for x in x])
     # ev1 = np.vectorize(eval_(A,x_))
     # ev2 = np.vectorize(eval_())
     # y_ = np.multiply()
