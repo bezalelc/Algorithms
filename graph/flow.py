@@ -21,7 +21,7 @@ def dfs(G, s, t, theta=None):
     def dfs_visit(v):
         color[v] = 'gray'
         for e in v.edges:
-            if color[e.to] == 'white':  # and e.weight > 0
+            if color[e.to] == 'white':
                 if theta and e.weight < theta:
                     continue
                 pi_edges[e.to] = e

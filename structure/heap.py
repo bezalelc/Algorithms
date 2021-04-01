@@ -1,9 +1,6 @@
 import copy
 
 
-# import struct_
-
-
 class BinaryHeap:
     """
     BinaryHeap class:

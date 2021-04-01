@@ -254,14 +254,10 @@ def expand(D, W, PI):
 def init_all_pairs(G):
     D, PI = [[float('inf') for v in G.V] for v in G.V], [[None for v in G.V] for v in G.V]
     for i, v in zip(range(len(G.V)), G.V):
-        v.data['i'] = i  # {'i': i}
+        v.data['i'] = i
     for v in G.V:
         D[v.data['i']][v.data['i']] = 0
-        # print(v.edges)
         for e in v.edges:
-            # print(e.from_)
-            # print(e.to)
-            # print(e.weight)
             D[v.data['i']][e.to.data['i']], PI[v.data['i']][e.to.data['i']] = e.weight, v
     return D, PI
 

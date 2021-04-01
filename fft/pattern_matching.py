@@ -119,7 +119,7 @@ def PI(P):
             pi.append(k)
         else:
             if k > 0:
-                k = pi[k]
+                k = pi[k - 1]
             else:
                 pi.append(0)
                 q += 1
@@ -140,3 +140,12 @@ if __name__ == '__main__':
     P = 'abaabcabaaba'
     pi = PI(P)
     print(PI('abaabab'))
+
+    print('-----------------')
+    T, P = 'ababbaaabbbaaa', 'bbaa'
+    print(naive_match(T, P))
+    print(rabin_karp_match(T, P, q=10))
+    print(KMP(T, P))
+
+    P = 'ababbabbabbababbabb'
+    print(PI(P))

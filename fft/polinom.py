@@ -118,7 +118,7 @@ def interpolation_newton(points):
 
 
 # ----------------------------  multiply  -------------------------------------
-def mult_coef(A, B):
+def mult_coef_poly(A, B):
     """
     multiply to Polynomials that represent by vector of values
         for example: Polynomial A= 1-2x+3x^2 => A=[1,-2,3]
@@ -145,7 +145,7 @@ def mult_coef(A, B):
     return C
 
 
-def mult_(A, B, interpolation=interpolation_vandermonde):
+def mult_simple(A, B, interpolation=interpolation_vandermonde):
     """
     multiply to Polynomials that represent by vector of values
         for example: Polynomial A= 1-2x+3x^2 => A=[1,-2,3]
@@ -180,16 +180,16 @@ if __name__ == '__main__':
     P, Q = np.array([1, -2, 3]), np.array([-4, 2])
     # [1, 2, 0],[-2, -2, 1],[-1, 0, 1, 2],[-2. -6. -3.  2.]
 
-    print(np.round(mult_coef(P, Q), 5))
+    print(np.round(mult_coef_poly(P, Q), 5))
     print('--------------------  mult polynomials test  ------------------------')
-    print(np.array_equal(np.round(mult_(A, B), 5), np.round(mult_coef(A, B), 5)))
-    print(np.array_equal(np.round(mult_(C, D), 2), np.round(mult_coef(C, D), 2)))
-    print(np.array_equal(np.round(mult_(E, F), 5), np.round(mult_coef(E, F), 5)))
-    print(np.array_equal(np.round(mult_(G, T), 5), np.round(mult_coef(G, T), 5)))
-    print(np.array_equal(np.round(mult_(X, Y), 5), np.round(mult_coef(X, Y), 5)))
-    print(np.array_equal(np.round(mult_(V, U), 5), np.round(mult_coef(V, U), 5)))
-    print(np.array_equal(np.round(mult_(I, J), 5), np.round(mult_coef(I, J), 5)))
-    print(np.array_equal(np.round(mult_(P, Q), 5), np.round(mult_coef(P, Q), 5)))
+    print(np.array_equal(np.round(mult_simple(A, B), 5), np.round(mult_coef_poly(A, B), 5)))
+    print(np.array_equal(np.round(mult_simple(C, D), 2), np.round(mult_coef_poly(C, D), 2)))
+    print(np.array_equal(np.round(mult_simple(E, F), 5), np.round(mult_coef_poly(E, F), 5)))
+    print(np.array_equal(np.round(mult_simple(G, T), 5), np.round(mult_coef_poly(G, T), 5)))
+    print(np.array_equal(np.round(mult_simple(X, Y), 5), np.round(mult_coef_poly(X, Y), 5)))
+    print(np.array_equal(np.round(mult_simple(V, U), 5), np.round(mult_coef_poly(V, U), 5)))
+    print(np.array_equal(np.round(mult_simple(I, J), 5), np.round(mult_coef_poly(I, J), 5)))
+    print(np.array_equal(np.round(mult_simple(P, Q), 5), np.round(mult_coef_poly(P, Q), 5)))
 
     print('--------------------  interpolation test  ------------------------')
     points = [(1, 12), (2, 15), (3, 16)]
@@ -205,4 +205,9 @@ if __name__ == '__main__':
     print(np.array_equal(interpolation_vandermonde(points), interpolation_lagrangh(points)))
     print(np.array_equal(interpolation_vandermonde(points), interpolation_newton(points)))
 
-    # interpolation_newton(points)
+    # points = [(0, 0), (1, 0), (2, 0), (3, 0), (4, 1), (5, 1), (6, 1), (7, 2), (8, 2), (9, 3)]
+    # print(interpolation_newton(points))
+    points = [(-1, 4), (0, 1), (1, 0), (2, -5)]
+    print(np.array_equal(interpolation_vandermonde(points), interpolation_lagrangh(points)))
+    print(np.array_equal(interpolation_vandermonde(points), interpolation_newton(points)))
+    print(interpolation_vandermonde(points))
