@@ -1,13 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+import optimizer as opt
 from general import load_data, normalize
 
 
-# def train(data, theta=None, train_func=None, normalize=None, optimizer=None, num_iter=None):
-#     X, y = data[:, :-1], data[:, -1:]
-#
-#     theta = theta if theta else 0
+# import loss
+class GradientDescent():
+    # normal_eq,linear,class,
+    pass
 
 
 class Regression():
@@ -15,12 +16,15 @@ class Regression():
 
 
 class LinearRegression():
+    # linear_cost,linear_grad,predict
 
     def __init__(self) -> None:
         super().__init__()
 
 
 class ClassRegression():
+    # class_cost,class_grad
+
     pass
 
 
@@ -39,104 +43,6 @@ def normal_eqn(X, y):
     :efficiency:
     """
     return np.linalg.pinv(X.T @ X) @ (X.T @ y)
-
-
-# --------------------------------------  optimizers  ---------------------------------------------
-def simple(X, y, theta, alpha, grad):
-    """
-    simple optimizer for linear regression
-
-    this function improve theta according to the derivative of cost(X)
-        theta[i+1] -= alpha*J'(X*theta[i])
-
-    :param
-        X: matrix of dataset [x(0).T,x(1).T,...,x(m).T]
-        y: real value for each example (=row) in X
-        theta: init vector of parameters for the feature
-        alpha: learning rate
-        grad: function to calculate the gradient
-
-    """
-    # print(grad(X, y, theta).shape, alpha, theta.shape)
-    # print(theta.shape,grad(X, y, theta).shape)
-    theta -= alpha * grad(X, y, theta)  # .reshape(theta.shape)
-
-
-def momentum(X, y, theta, V, alpha, beta, grad):
-    """
-    momentum optimizer for linear regression
-
-    this function improve theta according to the derivative of cost(X)
-        V[i] = beta*V[i-1] + alpha*J'(X*theta[i])
-        theta[k+1] -= V[i]
-
-    :param
-        X: matrix of dataset [x(0).T,x(1).T,...,x(m).T]
-        y: real value for each example (=row) in X
-        theta: init vector of parameters for the feature
-        alpha: learning rate
-        V: the mean of the theta until now
-        beta: should be between [0.8,1)
-
-    """
-    V[:] = beta * V + alpha * grad(X, y, theta)
-    theta -= V
-
-
-def ada_grad(X, y, theta, G, const, epsilon, grad):
-    """
-    Ada Grad optimizer for linear regression
-
-    this function improve theta according to the derivative of cost(X)
-        G[i] += G[i]+J'(X*theta[i])^2
-        ALPHA = const / np.sqrt(G + epsilon)
-        theta[i+1] -= ALPHA*theta[i]
-
-    :param
-        X: matrix of dataset [x(0).T,x(1).T,...,x(m).T]
-        y: real value for each example (=row) in X
-        theta: init vector of parameters for the feature
-        G: the sum of the all theta^2 history
-        cost: <float>: const number, recommended range [10e+4,10e+20]
-        epsilon: small number for the fot not divide in zero
-    """
-    G += grad(X, y, theta) ** 2
-    ALPHA = const / (np.sqrt(G) + epsilon)
-    theta -= ALPHA * grad(X, y, theta)
-
-
-def adam(X, y, theta, V, G, beta1, beta2, const, grad):
-    """
-    Adam optimizer for linear regression, this optimizer is a Combination of momentum and Ada Grad
-
-    this function improve theta according to the derivative of cost(X)
-        V = beta1 * V + (1 - beta1) * '(X*theta[i])
-        G = beta2 * G + (1 - beta2) * '(X*theta[i])^2
-        V, G = 1 / (1 - beta1) * V, 1 / (1 - beta2) * G
-        ALPHA = const / np.sqrt(G)
-        theta -= ALPHA * V
-
-
-    :param
-        X: matrix of dataset [x(0).T,x(1).T,...,x(m).T]
-        y: real value for each example (=row) in X
-        theta: init vector of parameters for the feature
-        V: the mean of the theta until now
-        beta1: should be between [0.8,1)
-        beta2: recommended around 0.999
-        cost: <float>: const number, recommended range [10e+4,10e+20]
-    """
-    grad_ = grad(X, y, theta)
-    V[:] = (beta1 * V + (1 - beta1) * grad_)
-    G[:] = (beta2 * G + ((1 - beta2) * (grad_ ** 2)))
-    V = (V / (1 - beta1))
-    G = (G / (1 - beta2))
-    # beta1, beta2 = beta1 ** 2, beta2 ** 2
-    # ALPHA = const / (np.sqrt(G + 10e-8))  # V-m,b1=0.9 , G-v,b2=0.999
-    # ALPHA = 10 / (np.sqrt(G) + 10e-8)  # V-m , G-v
-    # theta -= const * V / np.sqrt(G + 10e-8)
-    theta -= (1e+4) * V / (np.sqrt(G) + 10e-8)
-    # theta -= ALPHA * V
 
 
 # --------------------------------------  linear  -----------------------------------------------------
@@ -244,7 +150,7 @@ def one_vs_all(X, y):
     Y = (y == k)
     theta = np.zeros((X.shape[1], k.shape[0]))
     theta, J = regression(X, Y, theta, class_grad, cost=class_cost, num_iter=1000, alpha=0.001,
-                          optimizer=simple, batch=X.shape[0])
+                          optimizer=opt.simple, batch=X.shape[0])
     return theta, J
 
 
@@ -284,7 +190,7 @@ def one_vs_one(X, Y):
             x, y = np.insert(x, x.shape[0], X_all[j], axis=0), np.insert(y, x.shape[0], Y_all[j] == k[i], axis=0)
             t, J = regression(x, y, THETA[:, r].reshape((THETA.shape[0], 1)), class_grad, cost=class_cost,
                               num_iter=100, alpha=0.05,
-                              optimizer=momentum,
+                              optimizer=opt.momentum,
                               batch=x.shape[0])
             THETA[:, r] = t.reshape((t.shape[0],))
             r += 1
@@ -393,7 +299,7 @@ def predict(theta, x, data=None):
         print('need to specified normalize function')
 
 
-def regression(X, y, theta, grad, alpha=10e-7, num_iter=1000, batch=30, optimizer=simple, cost=None,
+def regression(X, y, theta, grad, alpha=10e-7, num_iter=1000, batch=30, optimizer=opt.simple, cost=None,
                optimizer_data=None):
     """
     linear regression
@@ -447,8 +353,7 @@ def regression(X, y, theta, grad, alpha=10e-7, num_iter=1000, batch=30, optimize
             optional optimizer_data:
                 V: the mean of the theta until now
                 G: the sum of the all theta^2 history
-                beta1: recommended is around 0.9
-                beta2: recommended is around 0.999
+                beta: <list>: (beta2, beta1): (recommended is around 0.9, recommended is around 0.999)
                 cost: <float>: const number, recommended range [10e+4,10e+20]
                 grad: function to calculate the gradient
 
@@ -461,33 +366,32 @@ def regression(X, y, theta, grad, alpha=10e-7, num_iter=1000, batch=30, optimize
     """
 
     optimizer_data, data = optimizer_data if optimizer_data else {}, []
-    if optimizer is simple:
+    if optimizer is opt.simple:
         """
         data=[alpha,grad]
         """
         data.append(alpha)
-    elif optimizer is momentum:
+    elif optimizer is opt.momentum:
         """
         data=[V,alpha,beta]
         """
         data.append(optimizer_data['V'] if 'V' in optimizer_data else np.zeros(theta.shape))
         data.append(optimizer_data['alpha'] if 'alpha' in optimizer_data else alpha)
         data.append(optimizer_data['beta'] if 'beta' in optimizer_data else 0.9)
-    elif optimizer is ada_grad:
+    elif optimizer is opt.ada_grad:
         """
         data=[G,const, epsilon]
         """
         data.append(optimizer_data['G'] if 'G' in optimizer_data else np.zeros(theta.shape))
         data.append(optimizer_data['const'] if 'const' in optimizer_data else 10e+13)
         data.append(optimizer_data['epsilon'] if 'epsilon' in optimizer_data else 10e-8)
-    elif optimizer is adam:
+    elif optimizer is opt.adam:
         """
-        data=[V, G, beta1, beta2, const]
+        data=[V, G, beta, const]
         """
         data.append(optimizer_data['V'] if 'V' in optimizer_data else np.zeros(theta.shape))
         data.append(optimizer_data['G'] if 'G' in optimizer_data else np.zeros(theta.shape))
-        data.append(optimizer_data['beta1'] if 'beta1' in optimizer_data else 0.9)
-        data.append(optimizer_data['beta2'] if 'beta2' in optimizer_data else 0.999)
+        data.append(optimizer_data['beta'] if 'beta' in optimizer_data else [0.9, 0.999])
         data.append(optimizer_data['const'] if 'const' in optimizer_data else 10e+12)
     data.append(grad)
 
@@ -554,7 +458,7 @@ def test_ex1data2():
     X, mu, sigma = normalize.standard_deviation(X)
     X = np.insert(X, 0, np.ones((X.shape[0]), dtype=X.dtype), axis=1)
     theta, J_history = regression(X, y, theta, linear_grad, alpha=0.01, num_iter=10000, batch=X.shape[0],
-                                  optimizer=simple, cost=linear_cost)
+                                  optimizer=opt.simple, cost=linear_cost)
     theta_test = normal_eqn(X, y)
     print(f'theta={[float(t) for t in theta]}\n real={[float(t) for t in theta_test]}\n')
     print(f'cost={linear_cost(X, y, theta)}\nreal={linear_cost(X, y, theta_test)}')
@@ -602,7 +506,7 @@ def test_general(file, func):
     X = np.insert(X, 0, np.ones((X.shape[0]), dtype=X.dtype), axis=1)
     theta = np.zeros((X.shape[1], 1))
     theta_test = normal_eqn(X, y)
-    theta, J_history = func(X, y, theta, linear_grad, alpha=0.1, num_iter=10, batch=40, optimizer=adam,
+    theta, J_history = func(X, y, theta, linear_grad, alpha=0.1, num_iter=10, batch=40, optimizer=opt.adam,
                             cost=linear_cost)
     print(f'theta={[float(t) for t in theta]}\n real={[float(t) for t in theta_test]}\n')
     print(f'cost={linear_cost(X, y, theta)}\nreal={linear_cost(X, y, theta_test)}')
@@ -639,7 +543,7 @@ def test_ex2data1():
     # print(class_grad(X, y, theta))
     theta = np.array([-25.06116393, 0.2054152, 0.2006545]).reshape((X.shape[1], 1))
     theta, J = regression(X, y, theta, class_grad, alpha=0.0000002, num_iter=10000, cost=class_cost,
-                          optimizer=momentum,
+                          optimizer=opt.momentum,
                           batch=X.shape[0])
     print(theta)
     print(J[-1:])
@@ -728,7 +632,7 @@ def test_ex2data2():
     # print(class_grad(X, y, theta))
     theta = np.array([-25.06116393, 0.2054152, 0.2006545]).reshape((X.shape[1], 1))
     theta, J = regression(X, y, theta, class_grad, alpha=0.0000002, num_iter=10000, cost=class_cost,
-                          optimizer=momentum,
+                          optimizer=opt.momentum,
                           batch=X.shape[0])
     print(theta)
     print(J[-1:])
@@ -780,7 +684,7 @@ def test_seeds():
     #     plt.title('regression')
     #     plt.show()
     theta, J = regression(X, Y, theta, class_grad, cost=class_cost, num_iter=1000, alpha=0.001,
-                          optimizer=simple, batch=X.shape[0])
+                          optimizer=opt.simple, batch=X.shape[0])
     print(J[0] - J[-1:])
     print(theta.tolist())
 
@@ -844,10 +748,10 @@ if __name__ == '__main__':
 
     # test_ex1data1()
     # test_ex1data2()
-    test_general('/home/bb/Documents/python/ML/data/ex1data2.txt', func=regression)
+    # test_general('/home/bb/Documents/python/ML/data/ex1data2.txt', func=regression)
     # test_ex2data1()
     # test_seeds()
-    # test_seeds_one_vs_one()
+    test_seeds_one_vs_one()
     # test_seeds_softmax()
 
     # Z = np.array([0.97337094, 0.85251098, 0.62495691, 0.63957056, 0.6969253])
@@ -866,3 +770,5 @@ if __name__ == '__main__':
     # print(np.diag(S) - np.outer(S, S))
     # S_matrix = np.tile(S_vector, S.shape[0])
     # print()
+
+    # np.where(a < limit, np.floor(a), np.ceil(a))
