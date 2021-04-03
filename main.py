@@ -1,10 +1,7 @@
-import numpy as np
-import sympy as sp
-
-
 def f(t):
     t[0] = t[0] ** 2
     # print(t)
+
 
 if __name__ == '__main__':
     # x = sp.symbols('x')
@@ -14,7 +11,9 @@ if __name__ == '__main__':
     # print(f(y))
     # print(np.sin(np.pi))
     # print(np.sin(np.pi))
-
-    t = [3, 2]
-    f(t)
-    print(t)
+    a = {'k': 1, 'v': 0}
+    b = {'k': 9, 'l': 8}
+    # b.update(a)
+    print({**a, **b})
+    print({**b, **a})
+    print({**b, **None})

@@ -5,10 +5,6 @@ functions for Measure the error for classification:
 """
 import numpy as np
 
-import gradient_descent as gd
-import optimizer as opt
-from general import load_data
-
 
 def accuracy(y, predict):
     return np.mean(predict == y)
@@ -113,6 +109,10 @@ def F_score(y, predict, beta=1):
 
 
 if __name__ == '__main__':
+    import gradient_descent as gd
+    import optimizer as opt
+    from general import load_data
+
     print('------------------------  test 1  ---------------------------')
     data = load_data.load_from_file('/home/bb/Documents/python/ML/data/ex2data1.txt')
     np.random.shuffle(data)
@@ -126,7 +126,8 @@ if __name__ == '__main__':
     # print(class_cost(X, y, theta))
     # print(class_grad(X, y, theta))
     theta = np.array([-25.06116393, 0.2054152, 0.2006545]).reshape((X.shape[1], 1))
-    theta, J = gd.regression(X, y, theta, gd.class_grad, alpha=0.000002, num_iter=100, cost=gd.class_cost,
+    theta, J = gd.regression(X, y, theta, gd.class_grad, optimizer_data={'alpha': [0.000002, ]}, num_iter=100,
+                             cost=gd.class_cost,
                              optimizer=opt.momentum,
                              batch=X.shape[0])
 
@@ -159,7 +160,8 @@ if __name__ == '__main__':
     #     theta[:, i], j = regression(X, Y[:, i], theta[:, i], class_grad, cost=class_cost, num_iter=100, alpha=0.001,
     #                                 optimizer=momentum, batch=X.shape[0])
     #     J.append(j)
-    theta, J = gd.regression(X, Y, theta, gd.class_grad, cost=gd.class_cost, num_iter=1000, alpha=0.001,
+    theta, J = gd.regression(X, Y, theta, gd.class_grad, cost=gd.class_cost, num_iter=1000,
+                             optimizer_data={'alpha': [0.001, ]},
                              optimizer=opt.simple, batch=X.shape[0])
     print(J[0] - J[-1:])
     print(theta.tolist())
@@ -181,3 +183,5 @@ if __name__ == '__main__':
     print('recall=', recall(y - 1, res - 1))
     print('precision=', precision(y - 1, res - 1))
     print('false_positive_rate=', false_positive_rate(y - 1, res - 1))
+
+    # np.where(a < limit, np.floor(a), np.ceil(a))
