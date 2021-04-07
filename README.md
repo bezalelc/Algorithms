@@ -9,6 +9,7 @@ Python library for:
 7. structure: data structures
 ---
 ##Description
+
 ###ML
 machine learning algorithms:
 * gradient descent: linear and classification
