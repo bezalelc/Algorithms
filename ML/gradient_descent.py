@@ -154,8 +154,8 @@ def one_vs_all(X, y):
     k = np.array(np.unique(y), dtype=np.uint8)
     Y = (y == k)
     theta = np.zeros((X.shape[1], k.shape[0]))
-    theta, J = regression(X, Y, theta, class_grad, cost=class_cost, num_iter=1000, alpha=0.001,
-                          optimizer=opt.simple, batch=X.shape[0])
+    theta, J = regression(X, Y, theta, class_grad, cost=class_cost, num_iter=1000, optimizer=opt.simple,
+                          batch=X.shape[0])
     return theta, J
 
 
@@ -459,7 +459,7 @@ def test_ex1data1():
 
     print('\n-------------------------------  regression  ---------------------------------------')
     theta = np.zeros((X.shape[1], 1))
-    theta, J_history = regression(X, y, theta, linear_grad, optimizer_data={'alpha': 1e-2}, num_iter=1000,
+    theta, J_history = regression(X, y, theta, linear_grad, optimizer_data={'alpha': [1e-2, ]}, num_iter=1000,
                                   batch=X.shape[0],
                                   cost=linear_cost)
     print(f'theta={[float(t) for t in theta]}')
@@ -514,7 +514,7 @@ def test_ex1data2():
     X, max_, min_ = normalize.simple_normalize(X)
     X = np.insert(X, 0, np.ones((X.shape[0]), dtype=X.dtype), axis=1)
     theta = np.zeros((X.shape[1], 1))
-    theta, J_history = regression(X, y, theta, linear_grad, optimizer_data={'alpha': 10e-1}, num_iter=10000,
+    theta, J_history = regression(X, y, theta, linear_grad, optimizer_data={'alpha': [10e-1, ]}, num_iter=10000,
                                   batch=X.shape[0],
                                   cost=linear_cost)
     print(f'theta={[float(t) for t in theta]}\nreal= {[float(t) for t in normal_eqn(X, y)]}')
@@ -541,7 +541,7 @@ def test_general(file, func):
     X = np.insert(X, 0, np.ones((X.shape[0]), dtype=X.dtype), axis=1)
     theta = np.zeros((X.shape[1], 1))
     theta_test = normal_eqn(X, y)
-    data = {'alpha': 0.4, 'lambda': 1, 'reg_cost': reg.ridge_cost, 'reg_grad': reg.ridge_grad}
+    data = {'alpha': [0.4, ], 'lambda': 1, 'reg_cost': reg.ridge_cost, 'reg_grad': reg.ridge_grad}
     theta, J_history = func(X, y, theta, linear_grad, optimizer_data=data, num_iter=1000, batch=30,
                             optimizer=opt.simple,
                             cost=linear_cost)
@@ -579,7 +579,8 @@ def test_ex2data1():
     # print(class_cost(X, y, theta))
     # print(class_grad(X, y, theta))
     theta = np.array([-25.06116393, 0.2054152, 0.2006545]).reshape((X.shape[1], 1))
-    theta, J = regression(X, y, theta, class_grad, optimizer_data={'alpha': 0.0000002}, num_iter=10000, cost=class_cost,
+    theta, J = regression(X, y, theta, class_grad, optimizer_data={'alpha': [0.0000002, ]}, num_iter=10000,
+                          cost=class_cost,
                           optimizer=opt.momentum,
                           batch=X.shape[0])
     print(theta)
@@ -729,7 +730,7 @@ def test_seeds():
     theta, J = regression(X, Y, theta, class_grad, cost=class_cost, num_iter=100, optimizer_data=data,
                           optimizer=opt.adam_w, batch=X.shape[0])
     print(J[0], J[-1:])
-    # print(theta.tolist())
+    print(theta.tolist())
 
     # plot
     plt.plot(range(len(J)), J)
@@ -789,11 +790,11 @@ if __name__ == '__main__':
     '/home/bb/Downloads/data/seeds_dataset.txt'
     """
 
-    # test_ex1data1()
-    # test_ex1data2()
-    # test_general('/home/bb/Documents/python/ML/data/ex1data2.txt', func=regression)
-    # test_ex2data1()
-    # test_ex2data2()
+    test_ex1data1()
+    test_ex1data2()
+    test_general('/home/bb/Documents/python/ML/data/ex1data2.txt', func=regression)
+    test_ex2data1()
+    test_ex2data2()
     test_seeds()
     # test_seeds_one_vs_one()
     # test_seeds_softmax()
