@@ -3,8 +3,8 @@ def naive_match(T, P):
     find Sub-shows of P inside T
 
     @param:
-        @T: long string to search P inside
-        @P: short string to search inside T
+        @T: long string_ to search P inside
+        @P: short string_ to search inside T
 
     :return: list of indexes where P found in T, index of the first char mach
 
@@ -31,8 +31,8 @@ def rabin_karp_match(T, P, q=101, d=256):
     find Sub-shows of P inside T
 
     @param:
-        @T: long string to search P inside
-        @P: short string to search inside T
+        @T: long string_ to search P inside
+        @P: short string_ to search inside T
         @q: Prime number
         @d: Counting base by default is 256 -> the range of ascii table
 
@@ -73,8 +73,8 @@ def KMP(T, P):
     find Sub-shows of P inside T
 
     @param:
-        @T: long string to search P inside
-        @P: short string to search inside T
+        @T: long string_ to search P inside
+        @P: short string_ to search inside T
 
     :return: list of indexes where P found in T, index of the first char mach
 
@@ -104,7 +104,7 @@ def KMP(T, P):
 
 def PI(P):
     """
-    find for all sub-string in P the max length of prefix that is also suffix
+    find for all sub-string_ in P the max length of prefix that is also suffix
 
     :return
         pi: list that contain for each char in P the corresponding max length

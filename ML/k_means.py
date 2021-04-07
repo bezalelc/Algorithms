@@ -1,9 +1,11 @@
 # import matplotlib.pyplot as plt
+import imageio
 import matplotlib.pyplot as plt
 import numpy as np
+from PIL import Image
 
 
-def find_mean(X, k, max_iter=100):
+def find_mean(X, k, max_iter=100, stop_condition=lambda X, u, j: J(X, u) == j):
     """
     K-means algorithm:
 
@@ -24,6 +26,7 @@ def find_mean(X, k, max_iter=100):
         # init random k points to be the means
         idx = np.random.randint(m, size=k)
         u = X[idx, :]
+        # u = np.array([[3, 3], [6, 2], [8, 5]])
         u_prev = u.copy()
 
         while True:
@@ -31,8 +34,13 @@ def find_mean(X, k, max_iter=100):
             for i in range(k):
                 w[:, i] = np.sum((X - u[i]) ** 2, axis=1)
             y = np.argmin(w, axis=1)
+            j = J(X, u)
+
+            # --------
             # plt.figure(figsize=(8, 6))
             # c = ['r', 'g', 'b']
+            # print(u.shape,X.shape)
+            # ---------
 
             # update u
             for i in range(k):
@@ -40,12 +48,17 @@ def find_mean(X, k, max_iter=100):
                 if idx.shape[0] == 0:
                     continue
                 u[i] = np.mean(X[idx], axis=0)
+
+                # ----------
                 # plt.scatter(X[idx, 0], X[idx, 1], marker='*', linewidths=1, color=c[i])
-                # plt.scatter(u[i, 0], u[i, 1], marker='+', linewidths=5, color=c[i])
+                # plt.scatter(X[idx, 0], X[idx, 1], marker='*', linewidths=1, color=c[i])
+                # plt.scatter(X[idx, 0], X[idx, 1], X[idx, 2], marker='*', linewidths=1)
+                # plt.scatter(u[i, 0], u[i, 1], u[i, 2], marker='o', linewidths=5)
             # print(J(X,u))
             # plt.show()
+            # -----------
 
-            if np.array_equal(u, u_prev):
+            if stop_condition(X, u, j):  # np.array_equal(u, u_prev):
                 break
             else:
                 u_prev = u
@@ -118,17 +131,14 @@ def best_mean(X, k_max=3):
 
 
 if __name__ == '__main__':
-    from ML.general import load_data
-    from PIL import Image
-
     # from PIL import Image
     # from ML.general import load_data
 
-    print('\n\n===================================== test ex1data2 =====================================')
-    data = load_data.load_from_file('/home/bb/Documents/python/ML/data/ex2data1.txt')
-    X, y = data[:, :-1], data[:, -1:]
-    u = find_mean(X, 2)
-    p = predict(X, u)
+    # print('\n\n===================================== test ex1data2 =====================================')
+    # data = load_data.load_from_file('/home/bb/Documents/python/ML/data/ex2data1.txt')
+    # X, y = data[:, :-1], data[:, -1:]
+    # u = find_mean(X, 2)
+    # p = predict(X, u)
     # print(np.mean(p == y))
     # best_mean(X,k_max=15)
 
@@ -136,15 +146,16 @@ if __name__ == '__main__':
     import scipy.io
 
     X = scipy.io.loadmat('/home/bb/Documents/octave/week8/machine-learning-ex7/ex7/ex7data2.mat')['X']
-    u = find_mean(X, 3)
+    # u = find_mean(X, 3, max_iter=1)
     # print(u)
     # print('---------------------------------  test best_mean()  --------------------------')
     # best_mean(X, k_max=14)
 
     print('---------------------------------  Reducing Image size  --------------------------')
-    import imageio
 
-    img = imageio.imread('/home/bb/Downloads/IMG-20180617-WA0018 (copy).jpg')
+    # /home/bb/Documents/octave/week8/machine-learning-ex7/ex7/bird_small.png
+    # /home/bb/Downloads/IMG-20180617-WA0018 (copy).jpg
+    img = imageio.imread('/home/bb/Documents/octave/week8/machine-learning-ex7/ex7/bird_small.png')
     X = np.array(img, dtype=np.float128)
     origin, D = np.array(X.copy(), dtype=np.uint8), X.shape
     print(D)
@@ -152,16 +163,18 @@ if __name__ == '__main__':
     X = X / 255
 
     # best_mean(X, 30)
+    # stop_condition1 = lambda X, u, j: J(X, u) != j
+    # stop_condition1 = lambda u, u_prev: np.array_equal(u, u_prev)
+
     u = find_mean(X, 16, max_iter=10)
     p = predict(X, u)
     u = np.round(u * 255)
     img = np.array(np.reshape(u[p, :], D), dtype=np.uint8)
 
-
     img = Image.fromarray(img, 'RGB')
-    img.save('/home/bb/Downloads/my.png')
-    # img.show()
-
+    img.save('/home/bb/Downloads/my1.png')
+    # # img.show()
+    #
     plt.figure()
     plt.subplot(1, 2, 1)
     plt.imshow(origin)

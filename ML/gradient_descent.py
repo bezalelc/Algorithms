@@ -323,7 +323,7 @@ def regression(X, y, theta, grad, cost=None, num_iter=1000, batch=30, optimizer=
         alpha: learning rate by default alpha=10e-7 for prevent Entertainment, recommended range: [1e-5,10]
         num_iter: number of the iteration , should be between (1000-10e+9)
         batch: number of example to compute at once, the recommended is 30
-        optimizer: <string>: algorithm to compute theta, optional [simple,momentum,ada_grad,adam]
+        optimizer: <string_>: algorithm to compute theta, optional [simple,momentum,ada_grad,adam]
         optimizer_data: <dict>: data for the specified optimizer
 
     optional optimizers algorithm: [simple,momentum,ada_grad,adam]
