@@ -11,12 +11,13 @@ Python library for:
 ##Description
 ###ML
 machine learning algorithms:
-* gradient descent
+* gradient descent: linear and classification
 * optimizers: like momentum,AdaGrad,Adam  
 * K-nn
 * K-means
 * generative models
-* loss with function to estimate the error
+* loss function to estimate the error like: 
+recall, precision, F_score, accuracy 
 ###dynamic
 function of dynamic programing:
 
