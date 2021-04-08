@@ -11,9 +11,10 @@ def f(x):
 def ido(func, x0, x1, landa=1e-7, epsilon=1e-7, max_iter=100):
     for i in range(max_iter):
         df = (f(x1) - f(x0)) / (x1 - x0)
+
         # if df
         # try:
-        x1 = x0 - f(x0) / df
+        x0,x1 =x1, x0 - f(x0) / df
         # raise
         print(x1)
         if np.abs(f(x1)) < landa or np.abs(x1 - x0) < epsilon:
