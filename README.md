@@ -19,6 +19,8 @@ machine learning algorithms:
 * generative models
 * loss function to estimate the error like: 
 recall, precision, F_score, accuracy 
+* GMM
+
 ###dynamic
 function of dynamic programing:
 
@@ -37,7 +39,7 @@ functions to treat polynomials
 * interpolation: with vandermonde matrix, lagrangh, newton,fft
 * multiply polynomials in Coefficients or values representation
 
-###string
+###string_
 algorithms for treating strings
 * pattern matching: naive mache, KMP, rabin karp
 

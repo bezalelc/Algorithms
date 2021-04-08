@@ -1,3 +1,6 @@
+"""
+Author: Bezalel Cohen
+"""
 import numpy as np
 
 from general import load_data
@@ -186,7 +189,7 @@ if __name__ == '__main__':
     # print((X_group[0]).shape)
     p = predict_gaussian_bayes(X_group[0][0:6], u, sigma)
     # print(p)
-    # print(np.argmax(p, axis=1))
+    print(np.mean(np.argmax(p, axis=1) == y))
     print('\n\n===================================== test naive bayes =====================================')
     data = np.zeros((1000, 4))
     data[:500, -1], data[500:800, -1], data[800:, -1] = 0, 1, 2

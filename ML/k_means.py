@@ -1,11 +1,16 @@
+"""
+Author: Bezalel Cohen
+"""
 # import matplotlib.pyplot as plt
 import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
+from ML.general import load_data
 
-def find_mean(X, k, max_iter=100, stop_condition=lambda X, u, j: J(X, u) == j):
+
+def find_mean(X, k, epoch=100):
     """
     K-means algorithm:
 
@@ -22,7 +27,8 @@ def find_mean(X, k, max_iter=100, stop_condition=lambda X, u, j: J(X, u) == j):
     m, n = X.shape[0], X.shape[1]
     u_res, w, y = np.zeros((k, n)), np.zeros((m, k)), np.zeros((m,))
 
-    for i in range(max_iter):
+    while epoch:
+        epoch -= 1
         # init random k points to be the means
         idx = np.random.randint(m, size=k)
         u = X[idx, :]
@@ -34,7 +40,6 @@ def find_mean(X, k, max_iter=100, stop_condition=lambda X, u, j: J(X, u) == j):
             for i in range(k):
                 w[:, i] = np.sum((X - u[i]) ** 2, axis=1)
             y = np.argmin(w, axis=1)
-            j = J(X, u)
 
             # --------
             # plt.figure(figsize=(8, 6))
@@ -58,10 +63,10 @@ def find_mean(X, k, max_iter=100, stop_condition=lambda X, u, j: J(X, u) == j):
             # plt.show()
             # -----------
 
-            if stop_condition(X, u, j):  # np.array_equal(u, u_prev):
+            if np.array_equal(u, u_prev):
                 break
             else:
-                u_prev = u
+                u_prev = u.copy()
 
         u_res = u_prev if J(X, u_prev) < J(X, u_res) else u_res
 
@@ -125,7 +130,7 @@ def best_mean(X, k_max=3):
     plt.figure(figsize=(8, 6))
     j = []
     for k in range(2, k_max):
-        j.append(J(X, find_mean(X, k, max_iter=3)))
+        j.append(J(X, find_mean(X, k, epoch=3)))
     plt.plot(range(len(j)), j)
     plt.show()
 
@@ -141,12 +146,12 @@ if __name__ == '__main__':
     # p = predict(X, u)
     # print(np.mean(p == y))
     # best_mean(X,k_max=15)
-
+    #
     print('\n\n===================================== test ex1data2 =====================================')
     import scipy.io
 
     X = scipy.io.loadmat('/home/bb/Documents/octave/week8/machine-learning-ex7/ex7/ex7data2.mat')['X']
-    # u = find_mean(X, 3, max_iter=1)
+    u = find_mean(X, 3, epoch=5)
     # print(u)
     # print('---------------------------------  test best_mean()  --------------------------')
     # best_mean(X, k_max=14)
@@ -155,31 +160,31 @@ if __name__ == '__main__':
 
     # /home/bb/Documents/octave/week8/machine-learning-ex7/ex7/bird_small.png
     # /home/bb/Downloads/IMG-20180617-WA0018 (copy).jpg
-    img = imageio.imread('/home/bb/Documents/octave/week8/machine-learning-ex7/ex7/bird_small.png')
-    X = np.array(img, dtype=np.float128)
-    origin, D = np.array(X.copy(), dtype=np.uint8), X.shape
-    print(D)
-    X = X.reshape((X.shape[0] * X.shape[1], -1))
-    X = X / 255
+    # img = imageio.imread('/home/bb/Documents/octave/week8/machine-learning-ex7/ex7/bird_small.png')
+    # X = np.array(img, dtype=np.float128)
+    # origin, D = np.array(X.copy(), dtype=np.uint8), X.shape
+    # print(D)
+    # X = X.reshape((X.shape[0] * X.shape[1], -1))
+    # X = X / 255
 
     # best_mean(X, 30)
     # stop_condition1 = lambda X, u, j: J(X, u) != j
     # stop_condition1 = lambda u, u_prev: np.array_equal(u, u_prev)
 
-    u = find_mean(X, 16, max_iter=10)
-    p = predict(X, u)
-    u = np.round(u * 255)
-    img = np.array(np.reshape(u[p, :], D), dtype=np.uint8)
-
-    img = Image.fromarray(img, 'RGB')
-    img.save('/home/bb/Downloads/my1.png')
-    # # img.show()
+    # u = find_mean(X, 16, max_iter=10)
+    # p = predict(X, u)
+    # u = np.round(u * 255)
+    # img = np.array(np.reshape(u[p, :], D), dtype=np.uint8)
     #
-    plt.figure()
-    plt.subplot(1, 2, 1)
-    plt.imshow(origin)
-    plt.title('origin image')
-    plt.subplot(1, 2, 2)
-    plt.imshow(img)
-    plt.title('compressed image')
-    plt.show()
+    # img = Image.fromarray(img, 'RGB')
+    # img.save('/home/bb/Downloads/my1.png')
+    # # # img.show()
+    # #
+    # plt.figure()
+    # plt.subplot(1, 2, 1)
+    # plt.imshow(origin)
+    # plt.title('origin image')
+    # plt.subplot(1, 2, 2)
+    # plt.imshow(img)
+    # plt.title('compressed image')
+    # plt.show()
