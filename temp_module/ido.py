@@ -3,7 +3,15 @@ import matplotlib.pyplot as plt
 import scipy as sc
 
 
-def f(x):
+def derivative(f, x0, x1):
+    return (f(x1) - f(x0)) / (x1 - x0)
+
+
+def grad(f, x):
+    pass
+
+
+def f1(x):
     # return np.exp(x ** 2) - 2 * np.cos(x ** 2) ** 3 + (-x) ** x
     # return np.sin(x)
     # return x ** 2 + 1
@@ -15,7 +23,7 @@ def f(x):
     # return x**2-x**x
 
 
-def ido(func, x0, x1, landa=1e-15, epsilon=1e-15, max_iter=100):
+def ido(f, x0, x1, grad, landa=1e-15, epsilon=1e-15, max_iter=100):
     """
     find root for function using newton's method
 
@@ -29,35 +37,35 @@ def ido(func, x0, x1, landa=1e-15, epsilon=1e-15, max_iter=100):
 
     :return:
     """
-    x_history, f_history = [x1], [f(x1)]
+    x_history, f_history, err_history = [x1], [f(x1)], []
     for i in range(max_iter):
-        df = (func(x1) - func(x0)) / (x1 - x0)
+        df = (f(x1) - f(x0)) / (x1 - x0)
 
         try:
-            x0, x1 = x1, x0 - func(x0) / df  # df
+            x0, x1 = x1, x0 - f(x0) / df  # df
             x_history.append(x1)
         except ZeroDivisionError:
             print('choose other points')
             return
 
-        if np.abs(func(x1)) < landa or np.abs(x1 - x0) < epsilon:
+        if np.abs(f(x1)) < landa or np.abs(x1 - x0) < epsilon:
             return x1, x_history
 
 
 if __name__ == '__main__':
     points = np.linspace(-10, 10, num=1000)
-    np.vectorize(f)
+    np.vectorize(f1)
 
-    x, x_history = ido(f, 1.0, 2.0)
+    x, x_history = ido(f1, None, 1.0, 2.0)
 
     # plot the function
     plt.figure(figsize=(12, 8))
     plt.title('ido')
     plt.subplot(1, 2, 1)
-    plt.plot(points, f(points))
+    plt.plot(points, f1(points))
     plt.legend('f(x) graph')
-    plt.scatter(x_history[:-1], f(np.array(x_history[:-1])), marker='.', linewidths=2, color='black')
-    plt.scatter(x_history[-1], f(np.array(x_history[-1])), marker='*', linewidths=3, color='red')
+    plt.scatter(x_history[:-1], f1(np.array(x_history[:-1])), marker='.', linewidths=2, color='black')
+    plt.scatter(x_history[-1], f1(np.array(x_history[-1])), marker='*', linewidths=3, color='red')
     plt.xlabel('x')
     plt.ylabel('f(x)')
     # plot the error
@@ -69,9 +77,9 @@ if __name__ == '__main__':
     plt.xlabel('iteration')
     plt.ylabel('error')
 
-    print(f'x={x}, f({x})={f(x)}')
+    print(f'x={x}, f({x})={f1(x)}')
     plt.show()
 
     from scipy.optimize import root
 
-    print(root(f, np.array([2., ])))
+    print(root(f1, np.array([2., ])))
