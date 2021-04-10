@@ -16,6 +16,19 @@ def f(x):
 
 
 def ido(func, x0, x1, landa=1e-15, epsilon=1e-15, max_iter=100):
+    """
+    find root for function using newton's method
+
+
+    :param func: function to find root
+    :param x0:
+    :param x1:
+    :param landa:
+    :param epsilon:
+    :param max_iter:
+
+    :return:
+    """
     x_history, f_history = [x1], [f(x1)]
     for i in range(max_iter):
         df = (func(x1) - func(x0)) / (x1 - x0)
