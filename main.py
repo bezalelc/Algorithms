@@ -1,3 +1,12 @@
+import numpy as np
+import sympy as sp
+import scipy as sc
+import scipy.optimize
+import matplotlib.pyplot as plt
+import math
+import cmath
+
+
 def f(t):
     t[0] = t[0] ** 2
     # print(t)
@@ -16,4 +25,4 @@ if __name__ == '__main__':
     # b.update(a)
     print({**a, **b})
     print({**b, **a})
-    print({**b, **None})
+    print(np.linalg.solve(np.array([1, ]).reshape((-1, 1)),np.array([1, ]).reshape((-1, 1))))

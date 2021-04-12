@@ -1,85 +1,113 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy as sc
 
 
-def derivative(f, x0, x1):
+def f(x):
+    return x ** 4 - 4 * x ** 3 + x ** 2
+
+
+# derivative function of f
+def df(x):
+    return 4 * x ** 3 - 12 * x ** 2 + 2 * x
+
+
+def secant(x0, x1):
     return (f(x1) - f(x0)) / (x1 - x0)
 
 
-def grad(f, x):
-    pass
-
-
-def f1(x):
-    # return np.exp(x ** 2) - 2 * np.cos(x ** 2) ** 3 + (-x) ** x
-    # return np.sin(x)
-    # return x ** 2 + 1
-    # return x ** (3 - x ** 3)
-    # return x ** 3  # + 7 - 8 * x ** 4 + (x / 5) ** 5
-    # return x ** 2 - 17
-    # return x ** 4 - 4 * x ** 3
-    return x ** 4 - 4 * x ** 3 + x ** 2
-    # return x**2-x**x
-
-
-def ido(f, x0, x1, grad, landa=1e-15, epsilon=1e-15, max_iter=100):
+def root_calc(f, x0, method, lambd=1e-7, epsilon=1e-7, max_iter=100):
     """
     find root for function using newton's method
 
+    :param f: function to find root
+    :param x0: start x point
+    :param method: method to calculate the derivative 'newton' for real derivative or else for secant
+    :param lambd: minimal value for stop condition => if |f(x1)| < lambd: return
+    :param epsilon: minimal value for stop condition => if |x1-x0| < epsilon: return
+    :param max_iter: max iteration
 
-    :param func: function to find root
-    :param x0:
-    :param x1:
-    :param landa:
-    :param epsilon:
-    :param max_iter:
-
-    :return:
+    :return: x_history: list of all x that we found, the last element is the closest root
     """
-    x_history, f_history, err_history = [x1], [f(x1)], []
+    x1 = x0 + 1
+    x_history = [x1]
     for i in range(max_iter):
-        df = (f(x1) - f(x0)) / (x1 - x0)
-
+        if method == 'newton':
+            df_x = df(x1)
+            x0 = x1
+        else:
+            df_x = secant(x0, x1)
         try:
-            x0, x1 = x1, x0 - f(x0) / df  # df
+            x0, x1 = x1, x0 - f(x0) / df_x
             x_history.append(x1)
         except ZeroDivisionError:
-            print('choose other points')
-            return
+            break
 
-        if np.abs(f(x1)) < landa or np.abs(x1 - x0) < epsilon:
-            return x1, x_history
+        if np.abs(f(x1)) < lambd or np.abs(x1 - x0) < epsilon:
+            break
+    return x_history
 
 
 if __name__ == '__main__':
-    points = np.linspace(-10, 10, num=1000)
-    np.vectorize(f1)
-
-    x, x_history = ido(f1, None, 1.0, 2.0)
-
-    # plot the function
-    plt.figure(figsize=(12, 8))
-    plt.title('ido')
-    plt.subplot(1, 2, 1)
-    plt.plot(points, f1(points))
-    plt.legend('f(x) graph')
-    plt.scatter(x_history[:-1], f1(np.array(x_history[:-1])), marker='.', linewidths=2, color='black')
-    plt.scatter(x_history[-1], f1(np.array(x_history[-1])), marker='*', linewidths=3, color='red')
+    # plot graph of f(x)
+    points = np.linspace(-1, 3.8, num=1000)
+    np.vectorize(f)
+    plt.plot(points, f(points))
     plt.xlabel('x')
     plt.ylabel('f(x)')
-    # plot the error
-    plt.subplot(1, 2, 2)
-    error = np.array([np.abs(x_ - x) for x_ in x_history])
-    plt.plot(range(len(error)), error)
-    plt.scatter(range(len(error)), error, marker='+', linewidths=2, color='black')
-    plt.grid()
-    plt.xlabel('iteration')
-    plt.ylabel('error')
-
-    print(f'x={x}, f({x})={f1(x)}')
+    plt.title('f(x) = x^4 - 4x^3 + x^2')
     plt.show()
 
-    from scipy.optimize import root
+    x_history = root_calc(f, 1.0, 'newton')
+    x = x_history[-1]
+    x_history = np.array(x_history)
+    print(f(x_history[-1]))
+    error = x_history - x
+    p1 = np.log(np.abs(error[2:-1] / error[1:-2])) / np.log(np.abs(error[1:-2] / error[:-3]))
+    c1 = error[2:-1] / (error[1:-2])  # **p1
 
-    print(root(f1, np.array([2., ])))
+    # plot newton error
+    plt.plot(range(len(error)), error)
+    plt.grid()
+    plt.xlabel('Iteration')
+    plt.ylabel('Error')
+    plt.scatter(len(error) - 1, 0, linewidths=3)
+    print('Newton: root =', x, '. Iterations =', len(error) - 1, '\nn\t\terror\t\t\t\t\t\t\tXn\t\t\t\t\t\t\t\tp')
+    for i in range(len(error)):
+        print(i, '\t', error[i], '\t\t\t', x_history[i], '\t\t\t',
+              f"{p1[i - 2] if i >= 2 and i < len(error) - 1 else ''}")
+
+    x_history = root_calc(f, 1.0, 'secant')
+    x_history = np.array(x_history)
+    error = x_history - x
+    p2 = np.log(error[2:-1] / error[1:-2]) / np.log(error[1:-2] / error[:-3])
+    c2 = error[2:-1] / (error[1:-2])
+
+    # plot secant error
+    plt.plot(range(len(error)), error)
+    plt.grid()
+    plt.xlabel('Iteration')
+    plt.ylabel('Error')
+    plt.legend(['Newton', 'Secant'])
+    plt.scatter(len(error) - 1, 0, linewidths=3)
+    print('\nSecant: root =', x, '. Iterations =', len(error) - 1, '\nn\t\terror\t\t\t\t\t\t\tXn\t\t\t\t\t\t\t\tp')
+    for i in range(len(error)):
+        print(i, '\t', error[i], '\t\t\t', x_history[i], '\t\t\t',
+              f"{p2[i - 2] if i >= 2 and i < len(error) - 1 else ''}")
+    plt.grid(ls='--')
+    plt.show()
+
+    # plot p
+    plt.plot(range(2, len(p1) + 2), p1)
+    plt.plot(range(2, len(p2) + 2), p2)
+    plt.xlabel('Iterations')
+    plt.ylabel('p')
+    plt.title('The order of convergence')
+    plt.legend(['p Newton', 'p Secant'])
+    plt.grid(ls='--')
+    plt.show()
+
+    print('\n', c1.tolist())
+    print(c2.tolist())
+    print(df(1.0))
+    print(f(1.0))
+
