@@ -11,6 +11,7 @@ function for polynomials: (for now only one variable supported)
 
 """
 import numpy as np
+import fft
 
 import interpolation as inter
 
@@ -59,6 +60,30 @@ def mult_coefficient(A, B):
     return C
 
 
+def mult_fft(P1, P2):
+    """
+    multiply to Polynomials that represent by vector of Coefficients
+        for example: Polynomial P1= 1-2x+3x^2 => P1=[1,-2,3]
+                     Polynomial P2= -4+2x     => P2=[-4,2]
+                     Polynomial C= P1*P2= -4+10x-16x^2+6^3 and the return will be: [ -4  10 -16   6]
+
+    :param:
+        @P1, P2 vectors that represent Polynomials
+
+    :return:
+        vector of Coefficients that represent Polynomial C= A*B
+
+    :complexity: O(n*log(n))
+    """
+    P1, P2 = np.array(P1), np.array(P2)
+    P1, P2 = np.append(P1, np.zeros((P2.shape[0],))), np.append(P2, np.zeros((P1.shape[0],)))
+    DFT1, DFT2 = fft.fft(P1), fft.fft(P2)  # np.fft.fft(P1), np.fft.fft(P2)
+    # DFT1, DFT2 = np.fft.fft(P1), np.fft.fft(P2)  # np.fft.fft(P1), np.fft.fft(P2)
+    coeff = fft.fft_reverse(DFT1 * DFT2)
+    # coeff = np.fft.ifft(DFT1 * DFT2)
+    return coeff if coeff[-1] != 0 else coeff[:np.where(coeff == 0)[0][-1]]
+
+
 def mult_point(A, B, interpolation=inter.vandermonde):
     """
     multiply to Polynomials that represent by vector of values
@@ -76,11 +101,12 @@ def mult_point(A, B, interpolation=inter.vandermonde):
     """
     x = np.arange(-len(A), len(B) - 1)
     y = np.multiply([eval_coefficient(A, x) for x in x], [eval_coefficient(B, x) for x in x])
-    # ev1 = np.vectorize(eval_(A,x_))
-    # ev2 = np.vectorize(eval_())
-    # y_ = np.multiply()
-    # print("--", np.array_equal(y, y_))
     return interpolation(np.column_stack((x, y)))
+
+
+def mult_large_num(a, b):
+    P1, P2 = np.array(list(map(int, str(a))))[::-1], np.array(list(map(int, str(b))))[::-1]
+    return eval_coefficient(mult_fft(P1, P2), 10.)
 
 
 if __name__ == '__main__':
@@ -125,3 +151,7 @@ if __name__ == '__main__':
     print(np.array_equal(inter.vandermonde(points), inter.lagrangh(points)))
     print(np.array_equal(inter.vandermonde(points), inter.newton(points)))
     print(inter.vandermonde(points))
+
+    print('-------------------  mult fft mult_large_num test 1  ----------------------------')
+    a, b = 6586546, 79658485
+    print(a * b, mult_large_num(a, b))

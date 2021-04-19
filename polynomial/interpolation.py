@@ -6,9 +6,15 @@ function for polynomials: (for now only one variable supported)
                    4. FFT method
 """
 import numpy as np
+import scipy as sc
 import sympy as sp
 import multiply as mult
+import math
+import cubic_spline
+import fft
 
+
+# **************************************  interpolation  *********************************************
 
 def vandermonde(points):
     """
@@ -60,7 +66,7 @@ def lagrangh(points):
     for x_i in X:
         numerator *= (x - x_i)
 
-    numerator = sp.factor(numerator)
+    # numerator = sp.factor(numerator)
     for y, i in zip(y, range(len(X))):
         f = y * sp.expand(numerator / (x - X[i]))
         denominator = 1
@@ -106,60 +112,155 @@ def newton(points):
     return sp.Poly(P, x).all_coeffs()[::-1]
 
 
-def fft(P):
+# **************************************  chebyshev  *********************************************
+
+
+def chebyshev_root(n, start, end):
     """
-    FFT algorithm to
+    return roots points of Chebyshev's polynomial
+
+    Chebyshev's polynomial: T_0(x)=1, T_1(x)=x,T_n(x)=2x*T_n_1(x)-T_n_2(x)
+    Equivalent polynomial:  G_0(x)=1, G_1(x)=x,G_n(x)=cos(n*arcs(x))
 
 
-    :param P: polynomial in Coefficients representation
+    :param n: [int] the rank of the Chebyshev's polynomial
+    :param start: [float] start point
+    :param end: [float] end point
 
     :return:
+        roots: roots points of Chebyshev's polynomial, array is size n
 
-    :complexity: O(n*log(n))
+    :complexity: O(n)
     """
+    i = np.arange(n + 1)
+    roots = np.cos((2 * i[:-1] + 1) * np.pi / (2 * n)) * (end - start) / 2 + (end + start) / 2
+    return roots
 
-    def fft_rec(P):
-        """
-        FFT recursive algorithm
+
+def chebyshev_extreme(n, start, end):
+    """
+    return extreme points of Chebyshev's polynomial
+
+    Chebyshev's polynomial: T_0(x)=1, T_1(x)=x,T_n(x)=2x*T_n_1(x)-T_n_2(x)
+    Equivalent polynomial:  G_0(x)=1, G_1(x)=x,G_n(x)=cos(n*arcs(x))
 
 
-        :param P: polynomial in Coefficients representation
+    :param n: [int] the rank of the Chebyshev's polynomial
+    :param start: [float] start point
+    :param end: [float] end point
 
-        :return:
+    :return:
+        extreme_points: extreme points of Chebyshev's polynomial, array is size n+1
 
-        :complexity: O(n) => for each recursion
-        """
-        if P.shape[0] == 1:
-            return P
+    :complexity: O(n)
+    """
+    i = np.arange(n + 1)
+    extreme = np.cos(i * np.pi / n) * (end - start) / 2 + (end + start) / 2
+    return extreme
 
-        P = P if P.shape[0] % 2 == 0 else np.append(P, 0)
-        n = P.shape[0]
 
-        y, y0, y1 = np.zeros((n,), dtype=np.complex256), fft_rec(P[::2]), fft_rec(P[1::2])
-        roots = unity_roots(n)
-        for k in range(n):
-            y[k] = y0[k % (n // 2)] + y1[k % (n // 2)] * roots[k]
+def chebyshev_T(n):
+    """
+    return Chebyshev's polynomial
 
-        return y
+    Chebyshev's polynomial: T_0(x)=1, T_1(x)=x,T_n(x)=2x*T_n_1(x)-T_n_2(x)
+    Equivalent polynomial:  G_0(x)=1, G_1(x)=x,G_n(x)=cos(n*arcs(x))
 
-    def unity_roots(n):
-        """
-        compute the unity toots fo Rank(n)
 
-        :param n: rank of complex polynomial x^n=1
+    :param n: [int] the rank of the Chebyshev's polynomial
 
-        :return: unity roots
+    :return: [sympy function] Chebyshev's polynomial in the Equivalent polynomial 'T' format
 
-        :complexity: O(n)
-        """
-        k = np.arange(n)
-        theta = (2 * np.pi * k) / n
-        roots = np.around(np.cos(theta) + np.sin(theta) * 1j, decimals=10)
-        # roots = np.cos(theta) + np.sin(theta) * 1j
-        return roots
+    :complexity: O(n)
+    """
+    x = sp.symbols('x')
+    Tn_1, Tn = 1, x
+    for i in range(2, n + 1):
+        Tn_1, Tn = Tn, sp.factor(2 * x * Tn - Tn_1)
 
-    P = np.array(P, dtype=np.complex256)
-    return fft_rec(P)
+    return Tn if n > 1 else x if n == 1 else 1 if n == 0 else None
+
+
+def chebyshev_G(n):
+    """
+    return Chebyshev's polynomial
+
+    Chebyshev's polynomial: T_0(x)=1, T_1(x)=x,T_n(x)=2x*T_n_1(x)-T_n_2(x)
+    Equivalent polynomial:  G_0(x)=1, G_1(x)=x,G_n(x)=cos(n*arcs(x))
+
+
+    :param n: [int] the rank of the Chebyshev's polynomial
+
+    :return: [sympy function] Chebyshev's polynomial in the Equivalent polynomial 'G' format
+
+    :complexity: O(1)
+    """
+    x = sp.symbols('x')
+    return 1 if n == 0 else x if n == 1 else sp.cos(n * sp.acos(x))
+
+
+def chebyshev_Q(n):
+    """
+    return Chebyshev's polynomial in Normalized format
+
+    extreme points: Q(x_i)=(-1)^i * 2^(1-n), x=[cos(pi*i/n) for i in range n]
+    roots points:   Q(x_i)=0, x=[cos(pi*(i*2+1)/2n) for i in range n-1]
+
+
+    Chebyshev's polynomial: T_0(x)=1, T_1(x)=x,T_n(x)=2x*T_n_1(x)-T_n_2(x)
+    Equivalent polynomial:  G_0(x)=1, G_1(x)=x,G_n(x)=cos(n*arcs(x))
+
+
+    :param n: [int] the rank of the Chebyshev's polynomial
+
+    :return: [sympy function] Chebyshev's polynomial in the Equivalent polynomial 'G' format
+
+    :complexity: O(1)
+    """
+    return chebyshev_G(n) * 2 ** (1 - n)
+
+
+def err_max(n, points, df_n, c):
+    """
+    find the max error in interpolation
+
+    :param n: rank of the interpolation
+    :param points: interpolation points
+    :param df_n: f^(n+1) derivative
+    :param c: chosen point to get max value in df_n
+
+    :return: [float] max error
+
+    :complexity: O()
+    """
+    x = sp.symbols('x')
+    f_err = (df_n(c) / math.factorial(n + 1)) * sp.expand(sp.prod(x - points))
+    roots = np.array(sp.solve(sp.diff(f_err, x), x))
+    # print((sp.prod(x - points)))
+    # print(np.array(sp.solve(sp.diff(sp.expand(sp.prod(x - points), x), x))))
+    # print(sp.lambdify(x, sp.expand(sp.prod(x - points)), 'numpy')(roots))
+    f_err = sp.lambdify(x, f_err, 'numpy')
+    return np.max(np.abs(f_err(roots)))
+
+
+def chebyshev_err(n, start, end, df_n, c):
+    """
+     compute the error of interpolation using roots points of Chebyshev's polynomial
+
+     Chebyshev's polynomial: T_0(x)=1, T_1(x)=x,T_n(x)=2x*T_n_1(x)-T_n_2(x)
+     Equivalent polynomial:  G_0(x)=1, G_1(x)=x,G_n(x)=cos(n*arcs(x))
+
+
+     :param n: [int] the rank of the Chebyshev's polynomial
+     :param start: [float] start point
+     :param end: [float] end point
+
+     :return:
+         [float] max error of interpolation
+
+     :complexity: O(n)
+     """
+    return abs((1 / math.factorial(n + 1)) * df_n(c) * ((end - start) / 2) ** (n + 1) * 2 ** -n)
 
 
 if __name__ == '__main__':
@@ -205,7 +306,100 @@ if __name__ == '__main__':
     print(np.array_equal(vandermonde(points), newton(points)))
     print(vandermonde(points))
 
+    points = [(-1, 0), (0, 0), (1, 2)]
+    print(np.array_equal(vandermonde(points), lagrangh(points)))
+    print(np.array_equal(vandermonde(points), newton(points)))
+    print(vandermonde(points))
+
     print('--------------------------------------  fft test  ----------------------------------------------')
     P = [1, 2, 1]
-    print(np.array_equal(fft(P).tolist(), [(4 + 0j), 2j, 0j, -2j]))
+    print(np.array_equal(fft.fft(P).tolist(), [(4 + 0j), 2j, 0j, -2j]))
     print(P)
+    print('--------------------------------------  Chebyshev test  ----------------------------------------------')
+    extreme_points, reset_points = chebyshev_extreme(2, -1, 1), chebyshev_root(2, -1, 1)
+    print(extreme_points, '\n', reset_points)
+    extreme_points, reset_points = chebyshev_extreme(2, 0, np.pi), chebyshev_root(2, 0, np.pi)
+    print(extreme_points, '\n', reset_points)
+
+    x = sp.symbols('x')
+    start, end, n, f, c = 0, np.pi, 2, sp.sin(x), 1
+    root = chebyshev_root(n + 1, start, end)
+    exstrem = chebyshev_extreme(n, start, end)
+    print(root)
+    df_n = sp.lambdify(x, sp.diff(f, x, n + 1), 'numpy')
+    err_ = err_max(n, root, df_n, c)
+    print(err_)
+    f = chebyshev_T(3)
+
+    roots1, roots2 = np.array([0, np.pi / 2, np.pi]), chebyshev_root(n + 1, start, end)
+    n, start, end, c, x = 2, 0, np.pi, 0, sp.symbols('x')
+    f = sp.sin(x)
+    f_x = sp.lambdify(x, f, 'numpy')
+    points = [(xi, yi) for xi, yi in zip(roots1, f_x(roots1))]
+    df_n = sp.lambdify(x, sp.diff(f, x, n + 1), 'numpy')
+    p = lagrangh(points)
+    # p /= p[-1]
+    print('-------------------  regular roots  ----------------------------')
+    print(err_max(n, roots1, df_n, c))
+
+    print('-------------------  chebyshev roots error  ----------------------------')
+    print(roots2)
+    print('chebyshev roots=', err_max(n, roots2, df_n, c))
+    print('chebyshev roots=', chebyshev_err(n, start, end, df_n, c))
+
+    n, start, end, c, x = 2, 0, 2, 0, sp.symbols('x')
+    roots = chebyshev_root(n + 1, start, end)
+    f = x ** 3
+    f_x = sp.lambdify(x, f, 'numpy')
+    points = [(xi, yi) for xi, yi in zip(roots1, f_x(roots1))]
+    df_n = sp.lambdify(x, sp.diff(f, x, n + 1), 'numpy')
+    p = lagrangh(points)
+    print('\nf=', f)
+    print('roots=', roots)
+    print('chebyshev roots=', err_max(n, roots, df_n, c))
+    print('chebyshev roots=', chebyshev_err(n, start, end, df_n, c))
+
+    print('-------------------    ----------------------------')
+    points = [(-1, 0), (0, 0), (1, 2)]
+    coeff = newton(points)
+    n, start, end, c, x, f = 2, 0, np.pi, 0, sp.symbols('x'), 0
+    f_ = x ** 3 + x ** 2
+    for c, i in zip(coeff, range(len(coeff))):
+        f += c * x ** i
+    f_x = sp.lambdify(x, f, 'numpy')
+    roots = np.array(points)[:, 0]
+    df_n = sp.lambdify(x, sp.diff(f_, x, n + 1), 'numpy')
+    print(err_max(n, roots, df_n, 0))
+    print(3 / 8)
+
+    print('-------------------  cubic spline: n=4  ----------------------------')
+    points = [(1, 1), (2, 2), (3, 3), (4, 4)]
+    print(cubic_spline.cubic_spline4(points))
+    cubic_spline.cubic_spline4(points)
+
+    points = [(0, 0.3), (1, 1), (2, 5), (5, 7)]
+    print(cubic_spline.cubic_spline4_matrix(points)(9))
+    print(cubic_spline.cubic_spline4(points)(9))
+    print('-------------------  cubic spline: n=4, test 3  ----------------------------')
+    points = [(3, 0), (1, 1), (2, 0), (3, -1)]
+    print(cubic_spline.cubic_spline4_matrix(points)(1))
+    print(cubic_spline.cubic_spline4(points)(1))
+
+    print('-------------------  cubic spline: n=4, test 4  ----------------------------')
+    points = [(4, 0), (1, 1), (2, 0), (3, -1)]
+    print(cubic_spline.cubic_spline4_matrix(points)(1))
+    print(cubic_spline.cubic_spline4(points)(1))
+
+    print('-------------------  fft^-1 reverse test 1  ----------------------------')
+    a = [-1, -1, 0, 1]
+    DFT = fft.fft(a)
+    print("DFT=", DFT)
+    a_ = fft.fft_reverse(DFT)
+    print(a_)
+
+    print('-------------------  mult fft reverse test 2  ----------------------------')
+    P1, P2 = [-1, 1], [1, 1]
+    print(mult.mult_fft(P1, P2), mult.mult_coefficient(P1, P2))
+    print(np.array_equal(mult.mult_fft(P1, P2), mult.mult_coefficient(P1, P2)))
+    print(np.array_equal(np.around(mult.mult_fft(P1, P2), decimals=3)[:-1], mult.mult_point(P1, P2)))
+    mult.mult_large_num(123, 456)

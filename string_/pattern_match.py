@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def naive_match(T, P):
     """
     find Sub-shows of P inside T
@@ -127,8 +130,24 @@ def PI(P):
     return pi
 
 
+def fft_match(T, P):
+    """
+    find Sub-shows of P inside T using fft
+
+    @param:
+        @T: long string_ to search P inside
+        @P: short string_ to search inside T
+
+    :return: list of indexes where P found in T, index of the first char mach
+
+    :complexity: O(m*log(n)) where n,m=len(T),len(P)
+    """
+    n = np.unique(list("oiuhni")).shape[0]
+    
+    pass
+
+
 if __name__ == '__main__':
-    import numpy as np
 
     T, P = 'aabababbababaaaababbbabaaabababab', 'abab'
     print(naive_match(T, P))
