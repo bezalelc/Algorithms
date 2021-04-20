@@ -112,6 +112,33 @@ def newton(points):
     return sp.Poly(P, x).all_coeffs()[::-1]
 
 
+# **************************************  C  *********************************************
+def C_poly(points, n, multiply):
+    """
+    calculate the best coefficients (=C that minimize the error) for given points
+
+    @:param points: mx2 Matrix of points when Matrix[:,1]=x points and Matrix[:,2] = y points,
+            n: rank of polynomial to return
+            multiply: multiply that defined for the norm [norm1,norm2,norm_inf ...]
+
+    :return: C: vector of coefficients for the polynomial
+
+    :complexity: O((0.5n)^3) where n is rank of tha polynomial
+     """
+    points = np.array(points)
+    x, y = points[:n, 0], points[:n, 1]
+    L, rang = np.vander(x, increasing=True).T, np.arange(n)
+    M, f = np.empty((n, n)), np.sum(y * L, axis=1)
+
+    for i in range(n):
+        for j in range(i, n):
+            M[j, i] = M[i, j] = multiply(L[i], L[j])
+
+    # print(x, y, f)
+    # print(np.linalg.solve(M, f))
+    return np.linalg.solve(M, f)
+
+
 # **************************************  chebyshev  *********************************************
 
 

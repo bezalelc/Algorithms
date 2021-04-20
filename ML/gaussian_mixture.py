@@ -69,7 +69,7 @@ def mixture(X, k, epoch=30):
             sigma[i] = (((w[:, i].reshape((-1, 1)) * (X - mu[i])).T @ (X - mu[i])) + sigma_reg) / w_pere_k[i]
 
         j = cost(X, pi, mu, sigma, w)
-        print(j, j_best)
+        # print(j, j_best)
         if j == j_best:
             break
         elif j > j_best:

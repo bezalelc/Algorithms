@@ -37,8 +37,8 @@ def fft(coeff):
         y, y0, y1 = np.zeros((n,), dtype=np.complex256), fft_rec(coeff[::2]), fft_rec(coeff[1::2])
         roots = unity_roots(n)
         for k in range(n):
-            n_ = n // 2
-            k_ = k % (n // 2)
+            # n_ = n // 2
+            # k_ = k % (n // 2)
             y[k] = y0[k % (n // 2)] + y1[k % (n // 2)] * roots[k]
 
         return y
