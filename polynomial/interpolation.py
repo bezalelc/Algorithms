@@ -134,8 +134,15 @@ def C_poly(points, n, multiply):
         for j in range(i, n):
             M[j, i] = M[i, j] = multiply(L[i], L[j])
 
-    # print(x, y, f)
-    # print(np.linalg.solve(M, f))
+    return np.linalg.solve(M, f)
+
+
+def C_poly_itegration(x, f_arr, f_origin, rang, n):
+    M, f = np.empty((n, n)), np.empty((n,))
+    for i in range(n):
+        f[i] = sp.integrate(f_arr[i] * f_origin, (x, *rang))
+        for j in range(i, n):
+            M[i, j] = M[j, i] = sp.integrate(f_arr[i] * f_arr[j], (x, *rang))
     return np.linalg.solve(M, f)
 
 
@@ -430,3 +437,7 @@ if __name__ == '__main__':
     print(np.array_equal(mult.mult_fft(P1, P2), mult.mult_coefficient(P1, P2)))
     print(np.array_equal(np.around(mult.mult_fft(P1, P2), decimals=3)[:-1], mult.mult_point(P1, P2)))
     mult.mult_large_num(123, 456)
+
+    print('-------------------  C_poly_itegration  ----------------------------')
+    x, f_arr, f_origin, rang, n = sp.symbols('x'), [1, x], x ** 2, (0, 2), 2
+    print(C_poly_itegration(x, f_arr, f_origin, rang, n))
