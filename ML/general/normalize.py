@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def standard_deviation(data):
+def standard_deviation(data, ddof=0):
     """
     Compute the standard deviation of data
 
@@ -18,7 +18,7 @@ def standard_deviation(data):
     sigma = np.sqrt(1 / m * np.sum((data - mu) ** 2, axis=0))
     sigma[sigma == 0] = 1  // if sigma[i] == 0 => need to divide by 1 because there is not standard deviation  
     '''
-    mu, sigma = np.mean(data, axis=0), np.std(data, axis=0)
+    mu, sigma = np.mean(data, axis=0), np.std(data, axis=0, ddof=ddof)
     sigma[sigma == 0] = 1
     data = (data - mu) / sigma
     return data, mu, sigma

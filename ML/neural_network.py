@@ -99,36 +99,51 @@ if __name__ == '__main__':
     #     plt.imshow(X[np.random.randint(5000), ::].reshape((20, 20)), cmap='gray')
     #     plt.colorbar()
     #     plt.show()
-    network_sizes = [X.shape[1], 25, 10]
-    W = compile(network_sizes, 0.12)
-    H = feedforward(W, X, sigmoid)
-    cost(X, y, W, 1, sigmoid)
-    grad(H, W, y, 0)
+    # network_sizes = [X.shape[1], 70, 80, 90, 100, 90, 80, 70, 50, 40, 30, 25, 25, 25, 10]
+    # W = compile(network_sizes, 0.12)
+    W = np.load('/home/bb/Downloads/W0.npy', allow_pickle=True)
+    # H = feedforward(W, X, sigmoid)
+    # cost(X, y, W, 1, sigmoid)
+    # grad(H, W, y, 0)
     landa = 1
     alpha = 1  # 0.001
 
     J, W_history = [], []
+    for w in W:
+        print(w.shape)
+
+    print('before')
+    print(cost(X, y, W, landa, sigmoid))
+    p = predict(X, W, sigmoid)
+    print(np.mean(p == y), '\n')
+    for i in range(3):
+        H = feedforward(W, X, sigmoid)
+        W = backpropagation(H, y, W, landa, alpha)
+        J.append(cost(X, y, W, landa, sigmoid))
+    print('after')
+    p = predict(X, W, sigmoid)
+    # print(np.mean(p == y))
+    # print(np.mean(p == y))
+    # fit(X, y, W, landa, 34, sigmoid)
+    plt.plot(range(len(J)), J)
+    plt.show()
+    print(J[-1])
     p = predict(X, W, sigmoid)
     print(np.mean(p == y))
-    W = np.load('/home/bb/Downloads/W.npy', allow_pickle=True)
-    fit(X, y, W, landa, 34, sigmoid)
-    # plt.plot(range(len(J)), J)
-    # plt.show()
-    # print(J[-1])
-    p = predict(X, W, sigmoid)
-    print(np.mean(p == y))
-    np.save('/home/bb/Downloads/W.npy', W, allow_pickle=True)
+    print(p)
+    print(y)
+    np.save('/home/bb/Downloads/W0.npy', W, allow_pickle=True)
 
-    dW = grad(H, W, y, landa)
-    import copy
-
-    W0, W1, W2 = copy.deepcopy(W), copy.deepcopy(W), copy.deepcopy(W)
-    for i in range(len(W)):
-        W0[i] -= dW[i]
-        W2[i] += dW[i]
-
-    J.append(cost(X, y, W0, landa, sigmoid))
-    J.append(cost(X, y, W1, landa, sigmoid))
-    J.append(cost(X, y, W2, landa, sigmoid))
-    print((J[2] - J[0]) / (2))
-    print(J[1])
+    # dW = grad(H, W, y, landa)
+    # import copy
+    #
+    # W0, W1, W2 = copy.deepcopy(W), copy.deepcopy(W), copy.deepcopy(W)
+    # for i in range(len(W)):
+    #     W0[i] -= dW[i]
+    #     W2[i] += dW[i]
+    #
+    # J.append(cost(X, y, W0, landa, sigmoid))
+    # J.append(cost(X, y, W1, landa, sigmoid))
+    # J.append(cost(X, y, W2, landa, sigmoid))
+    # print((J[2] - J[0]) / (2))
+    # print(J[1])
