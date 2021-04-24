@@ -58,7 +58,7 @@ if __name__ == '__main__':
     plt.hist(X[:, 0], bins=100, alpha=0.6, color='r')
     plt.hist(X[:, 1], bins=100, alpha=0.3, color='b')
     plt.hist2d(X[:, 0], X[:, 1], bins=40)  # , bins=100, alpha=0.3, color='b'
-    # plt.show()
+    plt.show()
     # log(X+c),X^(1/c) #, bins=np.arange((np.min(X[:, 0]) - 1, np.max(X[:, 0] + 1)), 100)
 
     fig = plt.figure(figsize=(10, 10))
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     colors = np.array(['r', 'b'])[np.array(p_multy >= eps, dtype=np.uint8)]
     fig112.scatter(X[:, 0], X[:, 1], alpha=0.8, c=colors, s=3, marker='o')
 
-    # plt.show()
+    plt.show()
 
     # print loss
     print('normal:')
