@@ -11,14 +11,6 @@ def gaussian(X):
 
 
 def predict(X, mu, sigma):
-    m, n = X.shape[0], X.shape[1]
-    # if len(sigma.shape) == 1 or sigma.shape[1] != n:
-    #     sigma = np.diag(sigma)
-
-    # p = np.empty((m, n))
-    # for j in range(n):
-    #     p[:, j] = np.exp(-0.5 * ((X[:, j] - mu[j]) / sigma[j]) ** 2) / ((2 * np.pi) ** 0.5 * sigma[j])
-
     p = np.exp(-0.5 * ((X - mu) / sigma) ** 2) / ((2 * np.pi) ** 0.5 * sigma)
     p = np.prod(p, axis=1)
     return p
@@ -66,7 +58,7 @@ if __name__ == '__main__':
     plt.hist(X[:, 0], bins=100, alpha=0.6, color='r')
     plt.hist(X[:, 1], bins=100, alpha=0.3, color='b')
     plt.hist2d(X[:, 0], X[:, 1], bins=40)  # , bins=100, alpha=0.3, color='b'
-    plt.show()
+    # plt.show()
     # log(X+c),X^(1/c) #, bins=np.arange((np.min(X[:, 0]) - 1, np.max(X[:, 0] + 1)), 100)
 
     fig = plt.figure(figsize=(10, 10))
@@ -91,11 +83,11 @@ if __name__ == '__main__':
     colors = np.array(['r', 'b'])[np.array(p_multy >= eps, dtype=np.uint8)]
     fig112.scatter(X[:, 0], X[:, 1], alpha=0.8, c=colors, s=3, marker='o')
 
-    plt.show()
+    # plt.show()
 
     # print loss
     print('normal:')
-    p_val=predict(Xval, mu, sigma) <= eps
+    p_val = predict(Xval, mu, sigma) <= eps
     print('accuracy', loss.accuracy(p_val, yval), end=', ')
     print('F_score', loss.F_score(p_val, yval), end=', ')
     print('recall', loss.recall(p_val, yval), end=', ')
@@ -104,7 +96,7 @@ if __name__ == '__main__':
 
     # print loss
     print('multivariate:')
-    p_val_multy=multivariate_predict(Xval, mu_multy, sigma_multy) <= eps
+    p_val_multy = multivariate_predict(Xval, mu_multy, sigma_multy) <= eps
     print('accuracy', loss.accuracy(p_val_multy, yval), end=', ')
     print('F_score', loss.F_score(p_val_multy, yval), end=', ')
     print('recall', loss.recall(p_val_multy, yval), end=', ')
