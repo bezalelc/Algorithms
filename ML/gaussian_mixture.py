@@ -139,6 +139,7 @@ def mixture_plot(X, k, epoch=5):
     x, y = np.meshgrid(X_sort[:, 0], X_sort[:, 1])
     XY = np.array([np.array([x.flatten(), y.flatten()])]).T.reshape((m ** 2, n))
 
+
     # plt.figure(figsize=(8, 8))
     # plt.scatter(X[:, 0], X[:, 1])
     # plt.show()

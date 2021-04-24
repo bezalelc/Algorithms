@@ -113,6 +113,7 @@ if __name__ == '__main__':
     print('---------------------  test ex7data1  -----------------------------')
     data = io.loadmat('/home/bb/Documents/octave/week8/machine-learning-ex7/ex7/ex7data1.mat')
     X = data['X']
+
     # print(data)
     # plt.scatter(X[:, 0], X[:, 1])
     # plt.show()
