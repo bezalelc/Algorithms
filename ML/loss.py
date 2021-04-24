@@ -23,7 +23,7 @@ def confusion_matrix(y, predict):
     :efficiency: O(m^2) where m in number of examples
     """
     m, k = y.shape[0], np.unique(y).shape[0]
-    y, predict = np.array(y.copy(), dtype=np.uint8), np.array(predict.copy(), dtype=np.uint8)
+    y, predict = np.array(y[:], dtype=np.uint8).reshape((-1,)), np.array(predict[:], dtype=np.uint8).reshape((-1,))
     M = np.zeros((k, k), dtype=np.float64)
     np.add.at(M, (y, predict), 1)
     return M / m
