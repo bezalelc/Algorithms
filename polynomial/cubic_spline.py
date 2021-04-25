@@ -33,7 +33,15 @@ def cubic_spline4_matrix(points):
     coeff = np.linalg.solve(M, A).reshape((-1, 4))
     x_ = sp.symbols('x')
     S = coeff[:, 0] * x_ ** 3 + coeff[:, 1] * x_ ** 2 + coeff[:, 2] * x_ + coeff[:, 3]
-    return sp.lambdify(x_, sp.Matrix(S), 'numpy')
+
+    # return function
+    func = [sp.lambdify(x_, S[i], 'numpy') for i in range(len(S))]
+    start, end = np.min(points[:, 0]), np.max(points[:, 0])
+    rang = end - start
+    map_points = lambda p: int((p - start) // (rang / n)) if p != end else n - 1
+    splines = np.vectorize(lambda p: func[map_points(p)](p))
+    return splines
+    # return sp.lambdify(x_, sp.Matrix(S), 'numpy')
 
 
 def cubic_spline4(points):
@@ -71,4 +79,19 @@ def cubic_spline4(points):
     x_ = sp.symbols('x')
     S = (z[:-1]) / (6 * h) * (x[1:] - x_) ** 3 + z[1:] / (6 * h) * (x_ - x[:-1]) ** 3
     S += c * (x_ - x[:-1]) + d * (x[1:] - x_)
-    return sp.lambdify(x_, sp.Matrix(S), 'numpy')
+
+    # return function
+    func = [sp.lambdify(x_, S[i], 'numpy') for i in range(len(S))]
+    start, end = np.min(points[:, 0]), np.max(points[:, 0])
+    rang = end - start
+    map_points = lambda p: int((p - start) // (rang / n)) if p != end else n - 1
+    splines = np.vectorize(lambda p: func[map_points(p)](p))
+    return splines
+    # return sp.lambdify(x_, sp.Matrix(S), 'numpy')
+
+
+if __name__ == '__main__':
+    points = np.linspace(-6, 6, num=3)
+    # points = np.vstack(np.linspace(-6, 6, num=3)
+    # print(points)
+    # cubic_spline4()
