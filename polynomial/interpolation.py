@@ -102,14 +102,14 @@ def newton(points):
     for i in range(M.shape[0]):
         for j in range(1, i + 1):
             M[i, j] = (M[i, j - 1] - M[i - 1, j - 1]) / (X[i] - X[i - j])
-    print(M)
+
     x = sp.symbols('x')
     P, p = M[0, 0], 1
     for coef, x_i in zip(np.diag(M)[1:], X):
         p *= (x - x_i)
         P += coef * p
 
-    return sp.Poly(P, x).all_coeffs()[::-1]
+    return np.array(sp.Poly(P, x).all_coeffs()[::-1])
 
 
 # **************************************  C  *********************************************
@@ -270,9 +270,6 @@ def err_max(n, points, df_n, c):
     x = sp.symbols('x')
     f_err = (df_n(c) / math.factorial(n + 1)) * sp.expand(sp.prod(x - points))
     roots = np.array(sp.solve(sp.diff(f_err, x), x))
-    # print((sp.prod(x - points)))
-    # print(np.array(sp.solve(sp.diff(sp.expand(sp.prod(x - points), x), x))))
-    # print(sp.lambdify(x, sp.expand(sp.prod(x - points)), 'numpy')(roots))
     f_err = sp.lambdify(x, f_err, 'numpy')
     return np.max(np.abs(f_err(roots)))
 
@@ -427,5 +424,11 @@ if __name__ == '__main__':
     # points = [(0, 1), (np.pi / 2, 0), (np.pi, -1)]
     points = chebyshev_root(3, 0, np.pi)
     points = [(x_i, np.cos(x_i)) for x_i in points]
-    # print(points)
-    newton(points)
+    p, df, n, a, b, c = newton(points), sp.sin, 2, 0, np.pi, np.pi / 2
+    print(chebyshev_err(2, a, b, df, c))
+
+    points = [0, np.pi / 2, np.pi]
+    points = [(x_i, np.cos(x_i)) for x_i in points]
+    p, df, n, c = newton(points), sp.sin, 2, np.pi / 2
+    # print(p)
+    print(err_max(n, np.array(points)[:, 0], df, c))

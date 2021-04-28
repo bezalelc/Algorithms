@@ -1,18 +1,18 @@
 import numpy as np
 
 
-def naive_check(num):
+def naive_check(n):
     """
     check if number is prime
 
-    :param num:
+    :param n:
 
     :return: True if num is prime False else
 
     :efficiency: O(n)
     """
-    for i in range(2, num):
-        if num % i == 0:
+    for i in range(2, n):
+        if n % i == 0:
             return False
     return True
 
