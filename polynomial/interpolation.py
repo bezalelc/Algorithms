@@ -426,9 +426,9 @@ if __name__ == '__main__':
     points = [(x_i, np.cos(x_i)) for x_i in points]
     p, df, n, a, b, c = newton(points), sp.sin, 2, 0, np.pi, np.pi / 2
     print(chebyshev_err(2, a, b, df, c))
+    print(err_max(n, np.array(points)[:, 0], df, c))
 
     points = [0, np.pi / 2, np.pi]
     points = [(x_i, np.cos(x_i)) for x_i in points]
     p, df, n, c = newton(points), sp.sin, 2, np.pi / 2
-    # print(p)
-    print(err_max(n, np.array(points)[:, 0], df, c))
+    # print(err_max(n, np.array(points)[:, 0], df, c))
