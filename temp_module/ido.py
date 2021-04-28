@@ -49,6 +49,7 @@ def root_calc(f, x0, method, lambd=1e-7, epsilon=1e-7, max_iter=100):
 
 if __name__ == '__main__':
     # plot graph of f(x)
+    plt.style.use('seaborn')
     points = np.linspace(-1, 3.8, num=1000)
     np.vectorize(f)
     plt.plot(points, f(points))

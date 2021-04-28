@@ -102,7 +102,7 @@ def newton(points):
     for i in range(M.shape[0]):
         for j in range(1, i + 1):
             M[i, j] = (M[i, j - 1] - M[i - 1, j - 1]) / (X[i] - X[i - j])
-
+    print(M)
     x = sp.symbols('x')
     P, p = M[0, 0], 1
     for coef, x_i in zip(np.diag(M)[1:], X):
@@ -406,31 +406,12 @@ if __name__ == '__main__':
     print(err_max(n, roots, df_n, 0))
     print(3 / 8)
 
-    print('-------------------  cubic spline: n=4  ----------------------------')
-    points = [(1, 1), (2, 2), (3, 3), (4, 4)]
-    print(cubic_spline.cubic_spline4(points))
-    cubic_spline.cubic_spline4(points)
-
-    points = [(0, 0.3), (1, 1), (2, 5), (5, 7)]
-    print(cubic_spline.cubic_spline4_matrix(points)(9))
-    print(cubic_spline.cubic_spline4(points)(9))
-    print('-------------------  cubic spline: n=4, test 3  ----------------------------')
-    points = [(3, 0), (1, 1), (2, 0), (3, -1)]
-    print(cubic_spline.cubic_spline4_matrix(points)(1))
-    print(cubic_spline.cubic_spline4(points)(1))
-
-    print('-------------------  cubic spline: n=4, test 4  ----------------------------')
-    points = [(4, 0), (1, 1), (2, 0), (3, -1)]
-    print(cubic_spline.cubic_spline4_matrix(points)(1))
-    print(cubic_spline.cubic_spline4(points)(1))
-
     print('-------------------  fft^-1 reverse test 1  ----------------------------')
     a = [-1, -1, 0, 1]
     DFT = fft.fft(a)
     print("DFT=", DFT)
     a_ = fft.fft_reverse(DFT)
     print(a_)
-
     print('-------------------  mult fft reverse test 2  ----------------------------')
     P1, P2 = [-1, 1], [1, 1]
     print(mult.mult_fft(P1, P2), mult.mult_coefficient(P1, P2))
@@ -441,3 +422,10 @@ if __name__ == '__main__':
     print('-------------------  C_poly_itegration  ----------------------------')
     x, f_arr, f_origin, rang, n = sp.symbols('x'), [1, x], x ** 2, (0, 2), 2
     print(C_poly_itegration(x, f_arr, f_origin, rang, n))
+
+    print('-------------------  newton  ----------------------------')
+    # points = [(0, 1), (np.pi / 2, 0), (np.pi, -1)]
+    points = chebyshev_root(3, 0, np.pi)
+    points = [(x_i, np.cos(x_i)) for x_i in points]
+    # print(points)
+    newton(points)

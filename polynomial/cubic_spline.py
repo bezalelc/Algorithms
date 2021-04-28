@@ -95,3 +95,23 @@ if __name__ == '__main__':
     # points = np.vstack(np.linspace(-6, 6, num=3)
     # print(points)
     # cubic_spline4()
+    print('-------------------  cubic spline: n=4  ----------------------------')
+    points = [(1, 1), (2, 2), (3, 3), (4, 4)]
+    print(cubic_spline4(points))
+    cubic_spline4(points)
+
+    points = [(0, 0.3), (1, 1), (2, 5), (5, 7)]
+    print(cubic_spline4_matrix(points)(9))
+    print(cubic_spline4(points)(9))
+    print('-------------------  cubic spline: n=4, test 3  ----------------------------')
+    points = [(3, 0), (1, 1), (2, 0), (3, -1)]
+    print(cubic_spline4_matrix(points)(1))
+    print(cubic_spline4(points)(1))
+
+    print('-------------------  cubic spline: n=4, test 4  ----------------------------')
+    points = [(4, 0), (1, 1), (2, 0), (3, -1)]
+    print(cubic_spline4_matrix(points)(1))
+    print(cubic_spline4(points)(1))
+
+
+
