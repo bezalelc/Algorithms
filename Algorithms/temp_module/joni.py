@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib as plot
 
-# x = y = range(10)
-# z
+x = y = range(10)
+z = np.zeros(n)
 def init(x, y, n, h, b):
 
     for i in range(n):
