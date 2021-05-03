@@ -1,6 +1,6 @@
 import numpy as np
 
-from ML.general import load_data
+from Algorithms.ML.general import load_data
 
 
 def predict(data, x, k=3):
