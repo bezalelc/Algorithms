@@ -1,8 +1,8 @@
-from structure.graph_struct import GraphNotAimed, Vertex, Graph
-from structure.list_struct import TwoWayList
-from structure.heap import BinaryHeap
-from graph.mst import BinaryHeapPrim
-from graph.dfs import topology
+from Algorithms.structure.graph_struct import GraphNotAimed, Vertex, Graph
+from Algorithms.structure.list_struct import TwoWayList
+from Algorithms.structure.heap import BinaryHeap
+from Algorithms.graph.mst import BinaryHeapPrim
+from Algorithms.graph.dfs import topology
 import numpy as np
 
 

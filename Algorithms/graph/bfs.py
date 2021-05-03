@@ -1,4 +1,4 @@
-from structure.graph_struct import Vertex, Graph, GraphNotAimed
+from Algorithms.structure.graph_struct import Vertex, Graph, GraphNotAimed
 from typing import Tuple
 
 

@@ -1,4 +1,4 @@
-from structure.graph_struct import Graph, Vertex
+from Algorithms.structure.graph_struct import Graph, Vertex
 import math
 
 

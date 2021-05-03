@@ -1,6 +1,6 @@
-from structure.graph_struct import GraphNotAimed, Vertex
-from structure.list_struct import TwoWayList
-from structure.heap import BinaryHeap
+from Algorithms.structure.graph_struct import GraphNotAimed, Vertex
+from Algorithms.structure.list_struct import TwoWayList
+from Algorithms.structure.heap import BinaryHeap
 
 
 def prim(G, restore=False):
