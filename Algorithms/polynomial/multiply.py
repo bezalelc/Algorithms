@@ -12,14 +12,6 @@ function for polynomials: (for now only one variable supported)
 """
 import numpy as np
 from polynomial import fft, interpolation as inter
-# import polynomial.fft, polynomial.interpolation
-
-
-# fft = polynomial.fft
-# inter = polynomial.interpolation
-
-
-# inter = polynomial.interpolation
 
 
 def eval_coefficient(A, x_0):

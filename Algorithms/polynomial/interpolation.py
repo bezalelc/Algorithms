@@ -6,19 +6,9 @@ function for polynomials: (for now only one variable supported)
                    4. FFT method
 """
 import numpy as np
-import scipy as sc
 import sympy as sp
 from polynomial import multiply as mult, fft
-# import polynomial.__init__
-# mult =__init__
-# import multiply as mult
-# import polynomial.fft, polynomial.multiply
-# import cubic_spline
-# from polynomial import fft
 import math
-
-
-# fft, mult = polynomial.fft, polynomial.multiply
 
 
 # **************************************  interpolation  *********************************************
