@@ -1,7 +1,7 @@
 import numpy as np
 import sympy as sp
 from sympy import integrate
-import polynomial.interpolation as inter
+import Algorithms.polynomial.interpolation as inter
 import math
 
 

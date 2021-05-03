@@ -1,4 +1,4 @@
-from polynomial import cubic_spline
+from Algorithms.polynomial import cubic_spline
 import numpy as np
 import matplotlib.pyplot as plt
 

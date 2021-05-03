@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
-from ML.general import load_data
+from Algorithms.ML.general import load_data
 
 
 def find_mean(X, k, epoch=100):
