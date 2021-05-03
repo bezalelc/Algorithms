@@ -1,4 +1,6 @@
-import nu
+import numpy as np
+import matplotlib as plot
+
 # x = y = range(10)
 # z
 def init(x, y, n, h, b):
