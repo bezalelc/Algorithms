@@ -8,7 +8,7 @@ function for polynomials: (for now only one variable supported)
 import numpy as np
 import scipy as sc
 import sympy as sp
-# from polynomial import multiply as mult, fft
+from polynomial import multiply as mult, fft
 # import polynomial.__init__
 # mult =__init__
 # import multiply as mult
