@@ -13,7 +13,7 @@ if __name__ == '__main__':
     points2 = np.linspace(-6, 6, num=3)
     points6 = np.linspace(-6, 6, num=7)
     points12 = np.linspace(-6, 6, num=13)
-    points90 = np.linspace(-6, 6, num=91)
+    points90 = np.linspace(-6, 6, num=30)
 
     points2 = [(x, f(x)) for x in points2]
     points6 = [(x, f(x)) for x in points6]
@@ -22,11 +22,18 @@ if __name__ == '__main__':
     points = [points2, points6, points12, points90]
     points = [np.array(p) for p in points]
 
-    splines2 = cubic_spline.cubic_spline4(points2)
-    splines6 = cubic_spline.cubic_spline4(points6)
-    splines12 = cubic_spline.cubic_spline4(points12)
-    splines90 = cubic_spline.cubic_spline4(points90)
+    # splines2 = cubic_spline.cubic_spline4(points2)
+    # splines6 = cubic_spline.cubic_spline4(points6)
+    # splines12 = cubic_spline.cubic_spline4(points12)
+    # splines90 = cubic_spline.cubic_spline4(points90)
     spline = [cubic_spline.cubic_spline4(p) for p in points]
+
+    # matrix splines
+    # splines2_mat = cubic_spline.cubic_spline4_matrix(points2)
+    # splines6_mat = cubic_spline.cubic_spline4_matrix(points6)
+    # splines12_mat = cubic_spline.cubic_spline4_matrix(points12)
+    # splines90_mat = cubic_spline.cubic_spline4_matrix(points90)
+    # spline_mat = [cubic_spline.cubic_spline4_matrix(p) for p in points]
 
     plt.style.use(
         'seaborn')  # seaborn,dark_background,seaborn-bright,grayscale,ggplot,fivethirtyeight,bmh,seaborn-poster
@@ -36,6 +43,7 @@ if __name__ == '__main__':
         fig_i = fig.add_subplot(i)
         fig_i.plot(real_points, f(real_points), label='f', c='b', alpha=0.5)
         fig_i.plot(real_points, sp(real_points), label='spline', c='y', alpha=0.5)
+        # fig_i.plot(real_points, sp_mat(real_points), label='spline mat', c='g', alpha=0.8)
         fig_i.scatter(p[:, 0], sp(p[:, 0]), marker='+', c='r', linewidths=2)
         fig_i.legend(loc="lower left")
         fig_i.set_title(f'{len(p) - 1} splines')

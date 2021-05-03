@@ -15,6 +15,7 @@ def cubic_spline4_matrix(points):
      """
     # init
     points = np.array(points)
+    points = points[points[:, 0].argsort()]
     x, y, n = points[:, 0], points[:, 1], points.shape[0] - 1
     X = np.vander(x, N=4, increasing=False)
 
@@ -35,12 +36,13 @@ def cubic_spline4_matrix(points):
     S = coeff[:, 0] * x_ ** 3 + coeff[:, 1] * x_ ** 2 + coeff[:, 2] * x_ + coeff[:, 3]
 
     # return function
-    func = [sp.lambdify(x_, S[i], 'numpy') for i in range(len(S))]
-    start, end = np.min(points[:, 0]), np.max(points[:, 0])
-    rang = end - start
-    map_points = lambda p: int((p - start) // (rang / n)) if p != end else n - 1
-    splines = np.vectorize(lambda p: func[map_points(p)](p))
-    return splines
+    return map_S(S, x_, points)
+    # func = [sp.lambdify(x_, S[i], 'numpy') for i in range(len(S))]
+    # start, end = np.min(points[:, 0]), np.max(points[:, 0])
+    # rang = end - start
+    # map_points = lambda p: int((p - start) // (rang / n)) if p != end else n - 1
+    # splines = np.vectorize(lambda p: func[map_points(p)](p))
+    # return splines
     # return sp.lambdify(x_, sp.Matrix(S), 'numpy')
 
 
@@ -58,6 +60,7 @@ def cubic_spline4(points):
      """
     # init
     points = np.array(points, dtype=np.float64)
+    points = points[points[:, 0].argsort()]
     x, y, n = points[:, 0], points[:, 1], points.shape[0] - 1
     h = x[1:] - x[:-1]
     b = (y[1:] - y[:-1]) * (6 / h)
@@ -80,14 +83,19 @@ def cubic_spline4(points):
     S = (z[:-1]) / (6 * h) * (x[1:] - x_) ** 3 + z[1:] / (6 * h) * (x_ - x[:-1]) ** 3
     S += c * (x_ - x[:-1]) + d * (x[1:] - x_)
 
-    # return function
-    func = [sp.lambdify(x_, S[i], 'numpy') for i in range(len(S))]
+    return map_S(S, x_, points)
+    # return splines
+    # return sp.lambdify(x_, sp.Matrix(S), 'numpy')
+
+
+def map_S(S, x, points):
+    n = points.shape[0] - 1
+    func = [sp.lambdify(x, S[i], 'numpy') for i in range(len(S))]
     start, end = np.min(points[:, 0]), np.max(points[:, 0])
     rang = end - start
     map_points = lambda p: int((p - start) // (rang / n)) if p != end else n - 1
     splines = np.vectorize(lambda p: func[map_points(p)](p))
     return splines
-    # return sp.lambdify(x_, sp.Matrix(S), 'numpy')
 
 
 if __name__ == '__main__':
@@ -101,10 +109,11 @@ if __name__ == '__main__':
     cubic_spline4(points)
 
     points = [(0, 0.3), (1, 1), (2, 5), (5, 7)]
-    print(cubic_spline4_matrix(points)(9))
-    print(cubic_spline4(points)(9))
+    print(cubic_spline4_matrix(points)(0.7))
+    print(cubic_spline4(points)(0.7))
     print('-------------------  cubic spline: n=4, test 3  ----------------------------')
-    points = [(3, 0), (1, 1), (2, 0), (3, -1)]
+    # points = [(3, 5), (1, 2), (2, 9), (3, -1)]
+    points = [(3, 5), (1, 2), (2, 9), (6, -1)]
     print(cubic_spline4_matrix(points)(1))
     print(cubic_spline4(points)(1))
 
@@ -112,6 +121,8 @@ if __name__ == '__main__':
     points = [(4, 0), (1, 1), (2, 0), (3, -1)]
     print(cubic_spline4_matrix(points)(1))
     print(cubic_spline4(points)(1))
-
-
-
+    print('-------------------    ----------------------------')
+    points = [(4, 0), (1, 1), (2, 0), (3, -1)]
+    # points = [(1, 1), (2, 0), (3, -1), (4, 0)]
+    print(cubic_spline4(points)(1))
+    print(cubic_spline4_matrix(points)(1))
