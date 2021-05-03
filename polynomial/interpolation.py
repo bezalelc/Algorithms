@@ -8,10 +8,11 @@ function for polynomials: (for now only one variable supported)
 import numpy as np
 import scipy as sc
 import sympy as sp
+# from  import multiply as mult  , fft, cubic_spline
 import multiply as mult
-import math
-import cubic_spline
 import fft
+import cubic_spline
+import math
 
 
 # **************************************  interpolation  *********************************************

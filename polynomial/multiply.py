@@ -13,7 +13,7 @@ function for polynomials: (for now only one variable supported)
 import numpy as np
 import fft
 
-import interpolation as inter
+import interpolation as inter  # ,fft
 
 
 def eval_coefficient(A, x_0):
