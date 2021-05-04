@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib as plot
+import matplotlib.pyplot as plt
 
 
 # n+1 splines

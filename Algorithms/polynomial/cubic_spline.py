@@ -34,11 +34,11 @@ def cubic_spline4_matrix(points):
 
     # calculate the coefficients
     coeff = np.linalg.solve(M, A).reshape((-1, 4))
-    x_ = sp.symbols('x')
-    S = coeff[:, 0] * x_ ** 3 + coeff[:, 1] * x_ ** 2 + coeff[:, 2] * x_ + coeff[:, 3]
+    x = sp.symbols('x')
+    S = coeff[:, 0] * x ** 3 + coeff[:, 1] * x ** 2 + coeff[:, 2] * x + coeff[:, 3]
 
     # return function
-    return map_S(S, x_, points)
+    return map_S(S, x, points)
 
 
 def cubic_spline4(points):
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     # points = [(4, 0), (1, 1), (2, 0), (3, -1)]
     # print(cubic_spline4_matrix(points)(1))
     # print(cubic_spline4(points)(1))
-    print('-------------------  n=n  ----------------------------')
+    print('-------------------  test 5  ----------------------------')
     points = np.linspace(7, 12, num=4)
     # points = np.arange(4)
     # print(points)
@@ -122,12 +122,16 @@ if __name__ == '__main__':
     real_points = np.linspace(7, 12, num=1000)
     # points = [(1, 1), (2, 0), (3, -1), (4, 0)]
     # print(cubic_spline4(points)(1))
-    spline_mat = cubic_spline4_matrix(points)
-    spline = cubic_spline4(points)
+    # spline_mat = cubic_spline4_matrix(points)
+    # spline = cubic_spline4(points)
+    #
+    # import matplotlib.pyplot as plt
+    #
+    # plt.plot(real_points, spline_mat(real_points), c='k')
+    # plt.plot(real_points, spline(real_points), c='b')
+    # plt.plot(real_points, f(real_points), c='r')
+    # plt.show()
 
-    import matplotlib.pyplot as plt
-
-    plt.plot(real_points, spline_mat(real_points), c='k')
-    plt.plot(real_points, spline(real_points), c='b')
-    plt.plot(real_points, f(real_points), c='r')
-    plt.show()
+    print('-------------------  test 5  ----------------------------')
+    points = [(0, 1), (2, 2), (4, 0)]
+    cubic_spline4_matrix(points)
