@@ -66,4 +66,5 @@ if __name__ == '__main__':
     # x = np.array([0.9, 1.3, 1.9, 2.1], dtype=np.float64)
     # y = np.array([1.3, 1.5, 1.85, 2.1], dtype=np.float64)
 
-    init(x, y)
+    f = init(x, y)
+    print(f(np.arange(1, 10)))
