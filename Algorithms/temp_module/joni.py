@@ -13,37 +13,47 @@ import matplotlib.pyplot as plt
 
 
 def init(x, y):
-    h = x[1:] + x[:-1]
+    n = x.shape[0] - 1
+
+    # init
+    h = x[1:] - x[:-1]
     b = (6 / h) * (y[1:] - y[:-1])
     u, v = 2 * (h[1:] + h[:-1]), b[1:] - b[:-1]
-    return u, v
 
-
-def rowReduction(u, h):
+    # rank
     for i in range(1, n - 1):
-        u[i] = u[i] - ((h[i - 1]) ** 2) / u[i - 1]
-        # v[i] = b[i] - b[i - 1] - (((h[i - 1]) ** 2) / u[i - 1]) * v[i - 1]
+        u[i] -= ((h[i] ** 2) / u[i - 1])
+        v[i] -= (h[i] / u[i - 1]) * v[i - 1]
+
+    # solve
+    z = np.zeros((n + 1,))
+    for i in range(n - 1, 0, - 1):
+        z[i] = (v[i - 1] - (h[i] * z[i + 1])) / u[i - 1]
 
 
-#
-# def solution:
-#     for i in range(n - 1, 0, -1):
-#         z[i] = (v[i] - (h[i - 1] * z[i + 1])) / u[i]
-#
-#
-# def print_hi(name):
-#     # Use a breakpoint in the code line below to debug your script.
-#     print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
 
+#         #     for i in range(n - 1, 0, -1):
+#         #         z[i] = (v[i] - (h[i - 1] * z[i + 1])) / u[i]
+#         # def sMake():
+    c[i] = (y[i+1] / h[i]) - (z[i+1]*h[i]) / 6
+    d[i] = (y[i]/h[i]) - (z[i] * h[i]) / 6
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    # print_hi('PyCharm')
-    n = 5
-    # h = np.empty((n,))
-    x = np.arange(n + 1)
-    h = x[1:] + x[:-1]
-    z = np.empty((5,))
+    # example from juda1
+    # x = np.array([1, 4, 9], dtype=np.float64)
+    # y = np.array([1, 2, 3], dtype=np.float64)
+    # example from juda1
+    # x = np.array([0, 1, 2, 3], dtype=np.float64)
+    # y = np.array([0, 1, 0, -1], dtype=np.float64)
+    # exmaple from some website
+    x = np.array([0.9, 1.3, 1.9, 2.1], dtype=np.float64)
+    y = np.array([1.3, 1.5, 1.85, 2.1], dtype=np.float64)
 
-    print()
-    print()
+    init(x, y)
+
+#
+    print(f'h={h}')
+    print(f'b={b}')
+    print(f'u={u}, u_={u_}, {np.array_equal(u,u_)}')
+    print(f'v={v}, v_={v_}, {np.array_equal(v,v_)}')
+    print(f'z={z}')
