@@ -9,7 +9,7 @@ def f(x):
 
 
 if __name__ == '__main__':
-    real_points = np.linspace(-6, 6, num=1000)
+    real_points = np.linspace(-6, 6, num=10000)
     points2 = np.linspace(-6, 6, num=3)
     points6 = np.linspace(-6, 6, num=7)
     points12 = np.linspace(-6, 6, num=13)

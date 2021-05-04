@@ -1,4 +1,5 @@
 import numpy as np
+import sympy as sp
 import matplotlib.pyplot as plt
 
 
@@ -30,30 +31,27 @@ def init(x, y):
     for i in range(n - 1, 0, - 1):
         z[i] = (v[i - 1] - (h[i] * z[i + 1])) / u[i - 1]
 
+    # c[i] = (y[i+1] / h[i]) - (z[i+1]*h[i]) / 6
+    # d[i] = (y[i]/h[i]) - (z[i] * h[i]) / 6
+    c = y[1:] / h - z[1:] * h / 6
+    d = y[:-1] / h - z[:-1] * h / 6
+
+    x_ = sp.symbols('x')
+    S = z[:-1] / (6 * h) * (x[1:] - x_) ** 3 + z[1:] / (6 * h) * (x_ - x[:-1]) ** 3 + c * (x_ - x[:-1]) + d * (
+                x[1:] - x_)
 
 
-#         #     for i in range(n - 1, 0, -1):
-#         #         z[i] = (v[i] - (h[i - 1] * z[i + 1])) / u[i]
-#         # def sMake():
-    c[i] = (y[i+1] / h[i]) - (z[i+1]*h[i]) / 6
-    d[i] = (y[i]/h[i]) - (z[i] * h[i]) / 6
+
 
 if __name__ == '__main__':
     # example from juda1
-    # x = np.array([1, 4, 9], dtype=np.float64)
-    # y = np.array([1, 2, 3], dtype=np.float64)
+    x = np.array([1, 4, 9], dtype=np.float64)
+    y = np.array([1, 2, 3], dtype=np.float64)
     # example from juda1
     # x = np.array([0, 1, 2, 3], dtype=np.float64)
     # y = np.array([0, 1, 0, -1], dtype=np.float64)
     # exmaple from some website
-    x = np.array([0.9, 1.3, 1.9, 2.1], dtype=np.float64)
-    y = np.array([1.3, 1.5, 1.85, 2.1], dtype=np.float64)
+    # x = np.array([0.9, 1.3, 1.9, 2.1], dtype=np.float64)
+    # y = np.array([1.3, 1.5, 1.85, 2.1], dtype=np.float64)
 
     init(x, y)
-
-#
-    print(f'h={h}')
-    print(f'b={b}')
-    print(f'u={u}, u_={u_}, {np.array_equal(u,u_)}')
-    print(f'v={v}, v_={v_}, {np.array_equal(v,v_)}')
-    print(f'z={z}')

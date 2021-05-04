@@ -7,7 +7,7 @@ function for polynomials: (for now only one variable supported)
 """
 import numpy as np
 import sympy as sp
-from polynomial import multiply as mult, fft
+from Algorithms.polynomial import multiply as mult, fft
 import math
 
 
