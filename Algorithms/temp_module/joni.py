@@ -9,10 +9,6 @@ import matplotlib.pyplot as plt
 # v,u -> n-1
 
 
-# x = y = range(10)
-# z = np.zeros(n)
-
-
 def init(x, y):
     n = x.shape[0] - 1
 
@@ -35,9 +31,6 @@ def init(x, y):
     for i in range(n - 1, 0, - 1):
         z[i] = (v[i - 1] - (h[i] * z[i + 1])) / u[i - 1]
 
-    # c[i] = (y[i+1] / h[i]) - (z[i+1]*h[i]) / 6
-    # d[i] = (y[i]/h[i]) - (z[i] * h[i]) / 6
-
     # c,d
     c = y[1:] / h - z[1:] * h / 6
     d = y[:-1] / h - z[:-1] * h / 6
@@ -48,9 +41,8 @@ def init(x, y):
             x[1:] - x_)
 
     # map function
-    start, end, range_ = x[0], x[-1], x[-1] - x[0]
-    func = [sp.lambdify(x, s, 'numpy') for s in S]
-    map_points = lambda x0: np.searchsorted(x, x0) - 1 if x0 != start else 0
+    func = [sp.lambdify(x_, s, 'numpy') for s in S]
+    map_points = lambda x0: np.searchsorted(x, x0) - 1 if x0 != x[0] else 0
     splines = np.vectorize(lambda x0: func[map_points(x0)](x0))
     return splines
 

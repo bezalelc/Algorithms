@@ -11,28 +11,20 @@ def f(x):
 if __name__ == '__main__':
     real_points = np.linspace(-6, 6, num=10000)
     points2 = np.linspace(-6, 6, num=3)
+    points4 = np.linspace(-6, 6, num=5)
     points6 = np.linspace(-6, 6, num=7)
     points12 = np.linspace(-6, 6, num=13)
-    points90 = np.linspace(-6, 6, num=30)
 
     points2 = [(x, f(x)) for x in points2]
+    points4 = [(x, f(x)) for x in points4]
     points6 = [(x, f(x)) for x in points6]
     points12 = [(x, f(x)) for x in points12]
-    points90 = [(x, f(x)) for x in points90]
-    points = [points2, points6, points12, points90]
+    points = [points2, points4, points6, points12]
     points = [np.array(p) for p in points]
 
-    # splines2 = cubic_spline.cubic_spline4(points2)
-    # splines6 = cubic_spline.cubic_spline4(points6)
-    # splines12 = cubic_spline.cubic_spline4(points12)
-    # splines90 = cubic_spline.cubic_spline4(points90)
+    # spline natural
     spline = [cubic_spline.cubic_spline4(p) for p in points]
-
     # matrix splines
-    # splines2_mat = cubic_spline.cubic_spline4_matrix(points2)
-    # splines6_mat = cubic_spline.cubic_spline4_matrix(points6)
-    # splines12_mat = cubic_spline.cubic_spline4_matrix(points12)
-    # splines90_mat = cubic_spline.cubic_spline4_matrix(points90)
     spline_mat = [cubic_spline.cubic_spline4_matrix(p) for p in points]
 
     plt.style.use(
