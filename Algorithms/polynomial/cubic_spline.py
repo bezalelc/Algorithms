@@ -85,10 +85,9 @@ def cubic_spline4(points):
 
 
 def map_S(S, x, points):
-    start, end, range_ = points[0, 0], points[-1, -1], points[-1, -1] - points[0, 0]  # x need to be sorted
     func = [sp.lambdify(x, s, 'numpy') for s in S]
     # map_points = lambda p: int((p - start) // (range_ / n)) if p != end else n - 1
-    map_points = lambda x0: np.searchsorted(points[:, 0], x0) - 1 if x0 != start else 0
+    map_points = lambda x0: np.searchsorted(points[:, 0], x0) - 1 if x0 != points[0, 0] else 0
     splines = np.vectorize(lambda x0: func[map_points(x0)](x0))
     return splines
 
