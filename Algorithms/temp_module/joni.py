@@ -49,6 +49,10 @@ def init(x, y):
 
     # map function
     start, end, range_ = x[0], x[-1], x[-1] - x[0]
+    func = [sp.lambdify(x, s, 'numpy') for s in S]
+    map_points = lambda x0: np.searchsorted(x, x0) - 1 if x0 != start else 0
+    splines = np.vectorize(lambda x0: func[map_points(x0)](x0))
+    return splines
 
 
 if __name__ == '__main__':
