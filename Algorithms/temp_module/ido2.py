@@ -33,17 +33,17 @@ if __name__ == '__main__':
     # splines6_mat = cubic_spline.cubic_spline4_matrix(points6)
     # splines12_mat = cubic_spline.cubic_spline4_matrix(points12)
     # splines90_mat = cubic_spline.cubic_spline4_matrix(points90)
-    # spline_mat = [cubic_spline.cubic_spline4_matrix(p) for p in points]
+    spline_mat = [cubic_spline.cubic_spline4_matrix(p) for p in points]
 
     plt.style.use(
         'seaborn')  # seaborn,dark_background,seaborn-bright,grayscale,ggplot,fivethirtyeight,bmh,seaborn-poster
     fig = plt.figure(figsize=(14, 10))
     # f, ax = fig.subplots(nrows=2, ncols=2, sharex=True, sharey=True)
-    for p, sp, i in zip(points, spline, range(221, 225, 1)):
+    for p, sp, sp_mat, i in zip(points, spline, spline_mat, range(221, 225, 1)):
         fig_i = fig.add_subplot(i)
         fig_i.plot(real_points, f(real_points), label='f', c='b', alpha=0.5)
-        fig_i.plot(real_points, sp(real_points), label='spline', c='y', alpha=0.5)
-        # fig_i.plot(real_points, sp_mat(real_points), label='spline mat', c='g', alpha=0.8)
+        fig_i.plot(real_points, sp(real_points), label='spline', c='k', alpha=1)
+        fig_i.plot(real_points, sp_mat(real_points), label='spline mat', c='g', alpha=0.8)
         fig_i.scatter(p[:, 0], sp(p[:, 0]), marker='+', c='r', linewidths=2)
         fig_i.legend(loc="lower left")
         fig_i.set_title(f'{len(p) - 1} splines')

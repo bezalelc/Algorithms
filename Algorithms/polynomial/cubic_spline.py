@@ -20,15 +20,17 @@ def cubic_spline4_matrix(points):
     X = np.vander(x, N=4, increasing=False)
 
     # build M,A
-    M, A, idx = np.zeros((4 * n, 4 * n)), np.zeros((4 * n,)), np.arange(4 * n)
-    M[idx // 4, idx], A[idx[:n]] = X[:-1, :].reshape((-1,)), y[:-1]
-    M[n + idx // 4, idx], A[idx[n:2 * n]] = X[1:, :].reshape((-1,)), y[1:]
-    M[2 * n + idx[:-4] // 4, idx[:-4]] = (X[1:-1, :] * np.array([3, 2, 1, 0])).reshape((-1,))
-    M[2 * n + idx[:-4] // 4, idx[4:]] = (X[1:-1, :] * np.array([3, 2, 1, 0])).reshape((-1,))
-    M[3 * n - 1 + idx[:-4] // 4, idx[:-4]] = (X[1:-1, :] * np.array([6, 1, 0, 0])).reshape((-1,))
-    M[3 * n - 1 + idx[:-4] // 4, idx[4:]] = (X[1:-1, :] * np.array([6, 1, 0, 0])).reshape((-1,))
-    M[-2, 0:4] = np.array([6, 1, 0, 0])
-    M[-1, n * 4 - 4:n * 4] = np.array([6, 1, 0, 0])
+    M, A, idx = np.zeros((4 * n, 4 * n)), np.zeros((4 * n,)), np.arange(n * 4).reshape((-1, 4))
+    M[idx // 4, idx] = X[:-1, :]
+    M[idx // 4 + n, idx] = X[1:, :]
+    idx = idx[:-1, :-1]
+    M[idx // 4 + n * 2, idx] = X[1:-1, 1:] * np.array([3, 2, 1])
+    M[idx // 4 + n * 2, idx + 4] = -M[idx // 4 + n * 2, idx]
+    idx = idx[:, :-1]
+    M[idx // 4 + n * 3 - 1, idx] = X[1:-1, 2:] * np.array([6, 2])
+    M[idx // 4 + n * 3 - 1, idx + 4] = -M[idx // 4 + n * 3 - 1, idx]
+    M[-2, :2], M[-1, -4:-2] = X[0, 2:] * np.array([6, 2]), X[-1, 2:] * np.array([6, 2])
+    A[:n], A[n:2 * n] = y[:-1], y[1:]
 
     # calculate the coefficients
     coeff = np.linalg.solve(M, A).reshape((-1, 4))
@@ -37,13 +39,6 @@ def cubic_spline4_matrix(points):
 
     # return function
     return map_S(S, x_, points)
-    # func = [sp.lambdify(x_, S[i], 'numpy') for i in range(len(S))]
-    # start, end = np.min(points[:, 0]), np.max(points[:, 0])
-    # rang = end - start
-    # map_points = lambda p: int((p - start) // (rang / n)) if p != end else n - 1
-    # splines = np.vectorize(lambda p: func[map_points(p)](p))
-    # return splines
-    # return sp.lambdify(x_, sp.Matrix(S), 'numpy')
 
 
 def cubic_spline4(points):
@@ -84,7 +79,6 @@ def cubic_spline4(points):
     S += c * (x_ - x[:-1]) + d * (x[1:] - x_)
 
     return map_S(S, x_, points)
-    # return splines
     # return sp.lambdify(x_, sp.Matrix(S), 'numpy')
 
 
@@ -99,30 +93,41 @@ def map_S(S, x, points):
 
 
 if __name__ == '__main__':
-    points = np.linspace(-6, 6, num=3)
-    # points = np.vstack(np.linspace(-6, 6, num=3)
+    # print('-------------------  cubic spline: n=4  ----------------------------')
+    # points = [(1, 1), (2, 2), (3, 3), (4, 4)]
+    # print(cubic_spline4(points))
+    # cubic_spline4(points)
+    #
+    # points = [(0, 0.3), (1, 1), (2, 5), (5, 7)]
+    # print(cubic_spline4_matrix(points)(0.7))
+    # print(cubic_spline4(points)(0.7))
+    # print('-------------------  cubic spline: n=4, test 3  ----------------------------')
+    # # points = [(3, 5), (1, 2), (2, 9), (3, -1)]
+    # points = [(3, 5), (1, 2), (2, 9), (6, -1)]
+    # print(cubic_spline4_matrix(points)(1))
+    # print(cubic_spline4(points)(1))
+    #
+    # print('-------------------  cubic spline: n=4, test 4  ----------------------------')
+    # points = [(4, 0), (1, 1), (2, 0), (3, -1)]
+    # print(cubic_spline4_matrix(points)(1))
+    # print(cubic_spline4(points)(1))
+    print('-------------------  n=n  ----------------------------')
+    points = np.linspace(7, 12, num=4)
+    # points = np.arange(4)
     # print(points)
-    # cubic_spline4()
-    print('-------------------  cubic spline: n=4  ----------------------------')
-    points = [(1, 1), (2, 2), (3, 3), (4, 4)]
-    print(cubic_spline4(points))
-    cubic_spline4(points)
-
-    points = [(0, 0.3), (1, 1), (2, 5), (5, 7)]
-    print(cubic_spline4_matrix(points)(0.7))
-    print(cubic_spline4(points)(0.7))
-    print('-------------------  cubic spline: n=4, test 3  ----------------------------')
-    # points = [(3, 5), (1, 2), (2, 9), (3, -1)]
-    points = [(3, 5), (1, 2), (2, 9), (6, -1)]
-    print(cubic_spline4_matrix(points)(1))
-    print(cubic_spline4(points)(1))
-
-    print('-------------------  cubic spline: n=4, test 4  ----------------------------')
-    points = [(4, 0), (1, 1), (2, 0), (3, -1)]
-    print(cubic_spline4_matrix(points)(1))
-    print(cubic_spline4(points)(1))
-    print('-------------------    ----------------------------')
-    points = [(4, 0), (1, 1), (2, 0), (3, -1)]
+    x = sp.symbols('x')
+    f = sp.lambdify(x, sp.sin(x), 'numpy')
+    points = np.concatenate((points[:, None], f(points)[:, None]), axis=1)
+    # print(points)
+    real_points = np.linspace(7, 12, num=1000)
     # points = [(1, 1), (2, 0), (3, -1), (4, 0)]
-    print(cubic_spline4(points)(1))
-    print(cubic_spline4_matrix(points)(1))
+    # print(cubic_spline4(points)(1))
+    spline_mat = cubic_spline4_matrix(points)
+    spline = cubic_spline4(points)
+
+    import matplotlib.pyplot as plt
+
+    plt.plot(real_points, spline_mat(real_points), c='k')
+    plt.plot(real_points, spline(real_points), c='b')
+    plt.plot(real_points, f(real_points), c='r')
+    plt.show()
