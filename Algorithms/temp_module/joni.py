@@ -11,7 +11,9 @@ import matplotlib.pyplot as plt
 
 # x = y = range(10)
 # z = np.zeros(n)
-
+def f(x):
+    y = (np.sin(x) + np.cos(x))
+    return np.sign(y) * np.abs(y) ** (1/3)
 
 def init(x, y):
     n = x.shape[0] - 1
@@ -25,11 +27,13 @@ def init(x, y):
     b = (6 / h) * (y[1:] - y[:-1])
     u, v = 2 * (h[1:] + h[:-1]), b[1:] - b[:-1]
 
+def rowReduction(u, v, h, n):
     # rank
     for i in range(1, n - 1):
         u[i] -= ((h[i] ** 2) / u[i - 1])
         v[i] -= (h[i] / u[i - 1]) * v[i - 1]
 
+def solution(n, v, h, u):
     # solve
     z = np.zeros((n + 1,))
     for i in range(n - 1, 0, - 1):
@@ -37,16 +41,15 @@ def init(x, y):
 
     # c[i] = (y[i+1] / h[i]) - (z[i+1]*h[i]) / 6
     # d[i] = (y[i]/h[i]) - (z[i] * h[i]) / 6
-
     # c,d
     c = y[1:] / h - z[1:] * h / 6
     d = y[:-1] / h - z[:-1] * h / 6
 
     # S
     x_ = sp.symbols('x')
-    S = z[:-1] / (6 * h) * (x[1:] - x_) ** 3 + z[1:] / (6 * h) * (x_ - x[:-1]) ** 3 + c * (x_ - x[:-1]) + d * (
-            x[1:] - x_)
+    S = z[:-1] / (6 * h) * (x[1:] - x_) ** 3 + z[1:] / (6 * h)*(x_ - x[:-1]) ** 3 + c * (x_ - x[:-1]) + d * (x[1:] - x_)
 
+def pointMapping(x, S):
     # map function
     start, end, range_ = x[0], x[-1], x[-1] - x[0]
     func = [sp.lambdify(x, s, 'numpy') for s in S]
