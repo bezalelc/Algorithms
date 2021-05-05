@@ -1,4 +1,5 @@
 import numpy as np
+import tkinter
 import sympy as sp
 import matplotlib.pyplot as plt
 
@@ -13,7 +14,8 @@ import matplotlib.pyplot as plt
 # z = np.zeros(n)
 def f(x):
     y = (np.sin(x) + np.cos(x))
-    return np.sign(y) * np.abs(y) ** (1/3)
+    return np.sign(y) * np.abs(y) ** (1 / 3)
+
 
 def init(x, y):
     n = x.shape[0] - 1
@@ -26,14 +28,18 @@ def init(x, y):
     h = x[1:] - x[:-1]
     b = (6 / h) * (y[1:] - y[:-1])
     u, v = 2 * (h[1:] + h[:-1]), b[1:] - b[:-1]
+    return u, v, h, b, n
+
 
 def rowReduction(u, v, h, n):
     # rank
     for i in range(1, n - 1):
         u[i] -= ((h[i] ** 2) / u[i - 1])
         v[i] -= (h[i] / u[i - 1]) * v[i - 1]
+    return u, v
 
-def solution(n, v, h, u):
+
+def solution(n, v, h, u, y):
     # solve
     z = np.zeros((n + 1,))
     for i in range(n - 1, 0, - 1):
@@ -47,7 +53,9 @@ def solution(n, v, h, u):
 
     # S
     x_ = sp.symbols('x')
-    S = z[:-1] / (6 * h) * (x[1:] - x_) ** 3 + z[1:] / (6 * h)*(x_ - x[:-1]) ** 3 + c * (x_ - x[:-1]) + d * (x[1:] - x_)
+    S = z[:-1] / (6 * h) * (x[1:] - x_) ** 3 + z[1:] / (6 * h) * (x_ - x[:-1]) ** 3 + c * (x_ - x[:-1]) + d * (
+            x[1:] - x_)
+
 
 def pointMapping(x, S):
     # map function
@@ -60,8 +68,8 @@ def pointMapping(x, S):
 
 if __name__ == '__main__':
     # example from juda1
-    x = np.array([1, 9, 4], dtype=np.float64)
-    y = np.array([1, 3, 2], dtype=np.float64)
+    # x = np.array([1, 9, 4], dtype=np.float64)
+    # y = np.array([1, 3, 2], dtype=np.float64)
     # example from juda1
     # x = np.array([0, 1, 2, 3], dtype=np.float64)
     # y = np.array([0, 1, 0, -1], dtype=np.float64)
@@ -69,5 +77,15 @@ if __name__ == '__main__':
     # x = np.array([0.9, 1.3, 1.9, 2.1], dtype=np.float64)
     # y = np.array([1.3, 1.5, 1.85, 2.1], dtype=np.float64)
 
-    f = init(x, y)
-    print(f(np.arange(1, 10)))
+    x = np.linspace(-6, 6, 10)
+    print (x)
+    u, v, h, b, n = init(x, f(x))
+    uR, vR = rowReduction(u, v, h, n)
+    # f = init(x, y)
+    plt.plot(x, f(x))
+    plt.xlabel('x axis label')
+    plt.ylabel('y axis label')
+    plt.legend(['Original', 'interpolated'])
+
+    plt.show()
+    # print(f(np.arange(1, 10)))
