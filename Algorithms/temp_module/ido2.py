@@ -33,7 +33,7 @@ if __name__ == '__main__':
     # f, ax = fig.subplots(nrows=2, ncols=2, sharex=True, sharey=True)
     for p, sp, sp_mat, i in zip(points, spline, spline_mat, range(221, 225, 1)):
         fig_i = fig.add_subplot(i)
-        fig_i.plot(real_points, f(real_points), label='f', c='b', alpha=0.5)
+        fig_i.plot(relal_points, f(real_points), label='f', c='b', alpha=0.5)
         fig_i.plot(real_points, sp(real_points), label='spline', c='k', alpha=1)
         fig_i.plot(real_points, sp_mat(real_points), label='spline mat', c='g', alpha=0.8)
         fig_i.scatter(p[:, 0], sp(p[:, 0]), marker='+', c='r', linewidths=2)

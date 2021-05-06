@@ -1,17 +1,18 @@
+"""
+authors:
+    bezalel cohen , 308571207
+    Yehonatan Deri, 209173988
+"""
 import numpy as np
 import tkinter
 import sympy as sp
 import matplotlib.pyplot as plt
 
-ASDADASD
 # n+1 splines
 # x,y,z -> n+1
 # h,b -> n
 # v,u -> n-1
 
-
-# x = y = range(10)
-# z = np.zeros(n)
 def f(x):
     y = (np.sin(x) + np.cos(x))
     return np.sign(y) * np.abs(y) ** (1 / 3)
@@ -57,12 +58,10 @@ def calcZ(h, u, v):
     for i in range(n - 1, 0, - 1):
         z[i] = (v[i - 1] - (h[i] * z[i + 1])) / u[i - 1]
 
-    # c[i] = (y[i+1] / h[i]) - (z[i+1]*h[i]) / 6
-    # d[i] = (y[i]/h[i]) - (z[i] * h[i]) / 6
-    # c,d
-    c = y[1:] / h - z[1:] * h / 6
-    d = y[:-1] / h - z[:-1] * h / 6
+    return z
 
+
+def calcS(x, h, z, c, d):
     # S
     var = sp.symbols('x')
     S = z[:-1] / (6 * h) * (x[1:] - var) ** 3 + z[1:] / (6 * h) * (var - x[:-1]) ** 3 + c * (var - x[:-1]) + d * \
@@ -70,11 +69,10 @@ def calcZ(h, u, v):
     return S, var
 
 
-def pointMapping(x, S):
+def pointMapping(S, x, var):
     # map function
-    start, end, range_ = x[0], x[-1], x[-1] - x[0]
-    func = [sp.lambdify(x, s, 'numpy') for s in S]
-    map_points = lambda x0: np.searchsorted(x, x0) - 1 if x0 != start else 0
+    func = [sp.lambdify(var, s, 'numpy') for s in S]
+    map_points = lambda x0: np.searchsorted(x, x0) - 1 if x0 != x[0] else 0
     splines = np.vectorize(lambda x0: func[map_points(x0)](x0))
     return splines
 
@@ -120,4 +118,5 @@ if __name__ == '__main__':
         fig_i.set_ylabel('f(x)')
 
     plt.show()
-    # print(f(np.arange(1, 10)))
+    # dark_background,seaborn-bright,grayscale,ggplot,fivethirtyeight,bmh,seaborn-poster
+    # darkorange
