@@ -3,7 +3,7 @@ import tkinter
 import sympy as sp
 import matplotlib.pyplot as plt
 
-
+ASDADASD
 # n+1 splines
 # x,y,z -> n+1
 # h,b -> n
