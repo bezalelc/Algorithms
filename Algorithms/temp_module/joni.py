@@ -83,7 +83,7 @@ def cubicSplain(x, y):
     z = calcZ(h, u, v)
     c, d = calcCD(y, h, z)
     S, var = calcS(x, h, z, c, d)
-    sMap = pointMapping(S, x, var)
+    sMap = pointMapping(S, x)
     return sMap
 
 
