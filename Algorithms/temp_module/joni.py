@@ -69,9 +69,9 @@ def calcS(x, h, z, c, d):
     return S, var
 
 
-def pointMapping(S, x, var):
+def pointMapping(S, x):
     # map function
-    func = [sp.lambdify(var, s, 'numpy') for s in S]
+    func = [sp.lambdify(s.free_symbols, s, 'numpy') for s in S]
     map_points = lambda x0: np.searchsorted(x, x0) - 1 if x0 != x[0] else 0
     splines = np.vectorize(lambda x0: func[map_points(x0)](x0))
     return splines
