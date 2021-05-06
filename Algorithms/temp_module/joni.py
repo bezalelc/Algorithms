@@ -8,6 +8,7 @@ import tkinter
 import sympy as sp
 import matplotlib.pyplot as plt
 
+
 # n+1 splines
 # x,y,z -> n+1
 # h,b -> n
@@ -85,6 +86,43 @@ def cubicSplain(x, y):
     S, var = calcS(x, h, z, c, d)
     sMap = pointMapping(S, x)
     return sMap
+
+
+def cubic_spline4_matrix(x, y):
+    """
+    calculate the coefficients for cubic spline
+
+    points: (n+1)x2 Matrix of points when Matrix[:,1]=x points and Matrix[:,2] = y points,
+            n is the rank of the polynomial
+
+    :return: [lambdify(sympy Matrix)] foe each S=[s0,s1,...,sn] where s_i(x)=a_i*x^3+b_i*x^2+c_i*x+d_i
+
+    :complexity: O((4n)^3) where n is points number -1
+     """
+    # init
+    n = x.shape[0] - 1
+    X = np.vander(x, N=4, increasing=False)
+
+    # build M,A
+    M, A, idx = np.zeros((4 * n, 4 * n)), np.zeros((4 * n,)), np.arange(n * 4).reshape((-1, 4))
+    M[idx // 4, idx] = X[:-1, :]
+    M[idx // 4 + n, idx] = X[1:, :]
+    idx = idx[:-1, :-1]
+    M[idx // 4 + n * 2, idx] = X[1:-1, 1:] * np.array([3, 2, 1])
+    M[idx // 4 + n * 2, idx + 4] = -M[idx // 4 + n * 2, idx]
+    idx = idx[:, :-1]
+    M[idx // 4 + n * 3 - 1, idx] = X[1:-1, 2:] * np.array([6, 2])
+    M[idx // 4 + n * 3 - 1, idx + 4] = -M[idx // 4 + n * 3 - 1, idx]
+    M[-2, :2], M[-1, -4:-2] = X[0, 2:] * np.array([6, 2]), X[-1, 2:] * np.array([6, 2])
+    A[:n], A[n:2 * n] = y[:-1], y[1:]
+
+    # calculate the coefficients
+    coeff = np.linalg.solve(M, A).reshape((-1, 4))
+    x = sp.symbols('x')
+    S = coeff[:, 0] * x ** 3 + coeff[:, 1] * x ** 2 + coeff[:, 2] * x + coeff[:, 3]
+
+    # return function
+    return pointMapping(S, x)
 
 
 if __name__ == '__main__':
