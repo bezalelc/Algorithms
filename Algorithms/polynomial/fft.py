@@ -2,7 +2,6 @@ import numpy as np
 import multiply
 
 
-
 def fft(coeff):
     """
     FFT algorithm to calculate the DFT of vector of polynomial in Coefficients representation
@@ -32,14 +31,12 @@ def fft(coeff):
         # if coeff.shape[0] == 1:
         #     return coeff
 
-        coeff = coeff if coeff.shape[0] % 2 == 0 else np.append(coeff, 0)
+        # coeff = coeff if coeff.shape[0] % 2 == 0 else np.append(coeff, 0)
         n = coeff.shape[0]
-
-        y, y0, y1 = np.zeros((n,), dtype=np.complex256), fft_rec(coeff[::2]), fft_rec(coeff[1::2])
+        y, y0, y1 = np.empty((n,), dtype=np.complex256), fft_rec(coeff[::2]), fft_rec(coeff[1::2])
         roots = unity_roots(n)
+
         for k in range(n):
-            # n_ = n // 2
-            # k_ = k % (n // 2)
             y[k] = y0[k % (n // 2)] + y1[k % (n // 2)] * roots[k]
 
         return y
@@ -56,8 +53,9 @@ def fft(coeff):
         """
         k = np.arange(n)
         theta = (2 * np.pi * k) / n
-        # roots = np.around(np.cos(theta) - np.sin(theta) * 1j, decimals=10)#+
-        roots = np.cos(theta) + np.sin(theta) * 1j  # +
+        roots = np.around(np.cos(theta) + np.sin(theta) * 1j, decimals=10)  # -
+        # roots = np.cos(theta) + np.sin(theta) * 1j  # +
+        # print(np.around(roots))
         return roots
 
     coeff = np.array(coeff, dtype=np.complex256)
@@ -84,10 +82,17 @@ def fft_reverse(DFT):
     return b / DFT.shape[0]
 
 
-# def
-
-
 if __name__ == '__main__':
-    print(123 * 456, multiply.eval_coefficient(multiply.mult_fft([3, 2, 1], [6, 5, 4]), 10))
-    print(np.round(multiply.mult_fft([1, 1, -1], [-1, 2, 0, 1]), decimals=2))
-    print(np.unique(list("oiuhni")))
+    # print(123 * 456, multiply.eval_coefficient(multiply.mult_fft([3, 2, 1], [6, 5, 4]), 10))
+    # print(np.round(multiply.mult_fft([1, 1, -1], [-1, 2, 0, 1]), decimals=2))
+    # print(np.unique(list("oiuhni")))
+    # print(fft([],[-1,-1,2]))
+    print('--------------------------------')
+    q, p = [2, 1, 0, 0], [-1, -1, 2, 0]
+    # DFT1, DFT2 = fft(q), fft(p)
+    # print('q=', np.around(DFT1), ' p=', np.around(DFT2))
+    # print(DFT2 * DFT1)
+    print(np.around(multiply.mult_fft(p, q)))
+    print(np.around(multiply.mult_coefficient(p, q)))
+    # print(np.around(multiply.m(p1, p2)))
+    print(np.around(fft([0, -5 - 5j, 2, -5 + 5j])))

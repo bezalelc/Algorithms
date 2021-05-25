@@ -1,10 +1,10 @@
 import numpy as np
-import crypto_.prime as prime
+# import crypto_.prime as prime
+import prime
 
 
 def keys():
     # p,q
-    p = q = 1000
     while True:
         p = np.random.randint(1000, 1e+7)
         if prime.is_prime(p):
@@ -13,21 +13,18 @@ def keys():
         q = np.random.randint(1000, 1e+7)
         if prime.is_prime(q):
             break
-    # p, q = 11, 7
     # n,l
     n, l = p * q, (p - 1) * (q - 1)
 
-    # e,d
     e = 0
     while True:
         e = np.random.randint(1, l - 1)
-        if prime.gcb(l, e) == 1:
+        if prime.gcd(l, e) == 1:
             # e = 13
             break
-    _, _, y = prime.extended_gcb(l, e)
+    _, _, y = prime.extended_gcd(l, e)
     d = y % l
 
-    # print(n, l, e, d)
     # P,S
     P, S = (n, e), (n, d)
     return P, S

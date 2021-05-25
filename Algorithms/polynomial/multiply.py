@@ -11,7 +11,7 @@ function for polynomials: (for now only one variable supported)
 
 """
 import numpy as np
-from polynomial import fft, interpolation as inter
+from Algorithms.polynomial import fft, interpolation as inter
 
 
 def eval_coefficient(A, x_0):
@@ -80,6 +80,48 @@ def mult_fft(P1, P2):
     coeff = fft.fft_reverse(DFT1 * DFT2)
     # coeff = np.fft.ifft(DFT1 * DFT2)
     return coeff if coeff[-1] != 0 else coeff[:np.where(coeff == 0)[0][-1]]
+
+
+def horner(P, x, version='rec'):
+    """
+    recursive version
+    multiply polynomial with horner's rule: P=[a0,a1,a2,...,an]
+        P(x)=a0+x(a1+x(a2+...x(an))))
+
+    :param
+        P: vectors that represent Polynomials
+        x: x point to eval P(x)
+        version: options: 'rec' => recursive horner algorithm
+                           else => iterative horner algorithm
+
+
+    :return: P(x)
+
+    :complexity: O()
+    """
+
+    def iter(P, x):
+        """
+        iterative version
+        """
+        res = P[-1]
+        for a in P[:-1][::-1]:
+            res = a + x * res
+        return res
+
+    def rec(P, x, n):
+        """
+         recursive vesion
+        """
+        if n == 1:
+            return P[-1] * x
+        return x * (P[-n] + rec(P, x, n - 1))
+
+    P = np.array(P)
+
+    if version == 'rec':
+        return P[0] + rec(P, x, P.shape[0] - 1)
+    return iter(P, x)
 
 
 def mult_point(A, B, interpolation_=inter.vandermonde):

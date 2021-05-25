@@ -7,7 +7,6 @@ function for polynomials: (for now only one variable supported)
 """
 import numpy as np
 import sympy as sp
-from Algorithms.polynomial import multiply as mult, fft
 import math
 
 
@@ -289,6 +288,9 @@ def chebyshev_err(n, start, end, df_n, c):
      """
     return abs((1 / math.factorial(n + 1)) * df_n(c) * ((end - start) / 2) ** (n + 1) * 2 ** -n)
 
+
+# Circular Imports
+from Algorithms.polynomial import multiply as mult, fft
 
 if __name__ == '__main__':
     A, B = np.array([0, 0, 0, 1]), np.array([1, 2, 3, 4, 5])

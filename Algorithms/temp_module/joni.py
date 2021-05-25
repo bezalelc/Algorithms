@@ -6,6 +6,7 @@ authors:
 import numpy as np
 import sympy as sp
 import matplotlib.pyplot as plt
+
 """
     array sizes:
         # n+1 splines
@@ -13,6 +14,7 @@ import matplotlib.pyplot as plt
         # h,b -> n
         # v,u -> n-1
 """
+
 
 def f(x):
     y = (np.sin(x) + np.cos(x))
@@ -135,10 +137,10 @@ if __name__ == '__main__':
         fig_i = fig.add_subplot(i)
         fig_i.plot(z, f(z), c='b', alpha=1, label='f(x)')
         fig_i.plot(z, spline(z), c='g', alpha=0.4, linewidth=8, label='spline')
-        fig_i.plot(z, spline_mat(z),'k--', c='k', alpha=1, label='spline mat')
-        fig_i.scatter(x, spline(x), marker='o', c='r', label='spline points', zorder = 4)
+        fig_i.plot(z, spline_mat(z), '--', c='k', alpha=1, label='spline mat')
+        fig_i.scatter(x, spline(x), marker='o', c='r', label='spline points', zorder=4)
         fig_i.legend(loc='lower left', fancybox=True, borderaxespad=0, prop={"size": 9})
         fig_i.set_title(f'{len(x) - 1} splines')
-        fig_i.axhline(y=0, color='k', alpha = 0.5)
-        fig_i.axvline(x=0, color='k', alpha = 0.5)
+        fig_i.axhline(y=0, color='k', alpha=0.5)
+        fig_i.axvline(x=0, color='k', alpha=0.5)
     plt.show()

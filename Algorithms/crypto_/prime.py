@@ -2,7 +2,7 @@ import numpy as np
 
 
 # ******************************************   gcb   ********************************************
-def gcb(a, b):
+def gcd(a, b):
     """
 
     :param a:
@@ -13,16 +13,16 @@ def gcb(a, b):
     :complexity: O(log(a+b)) -> worst case
     """
 
-    def gcb_(a, b):
+    def gcd_(a, b):
         if b == 0:
             return a
-        return gcb_(b, a % b)
+        return gcd_(b, a % b)
 
     a, b = max(a, b), min(a, b)
-    return gcb_(a, b)
+    return gcd_(a, b)
 
 
-def extended_gcb(a, b):
+def extended_gcd(a, b):
     """
 
     :param a:
@@ -33,14 +33,14 @@ def extended_gcb(a, b):
     :complexity: O(log(a+b))
     """
 
-    def extended_gcb_(a, b):
+    def extended_gcd_(a, b):
         if b == 0:
             return a, 1, 0
-        d, x, y = extended_gcb_(b, a % b)
+        d, x, y = extended_gcd_(b, a % b)
         return d, y, x - (a // b) * y
 
     a, b = max(a, b), min(a, b)
-    return extended_gcb_(a, b)
+    return extended_gcd_(a, b)
 
 
 # ******************************************   check prime   ********************************************
@@ -113,18 +113,18 @@ def pow_mod_large(x, p, n):
 # ******************************************   main test   *****************************************************
 if __name__ == '__main__':
     print('--------------------  gcb  ------------------')
-    print(gcb(34, 21))
+    print(gcd(34, 21))
     a, b = 51, 21
-    print(extended_gcb(a, b))
-    d, x, y = extended_gcb(a, b)
+    print(extended_gcd(a, b))
+    d, x, y = extended_gcd(a, b)
     print(d == x * a + y * b)
     a, b = 18, 7
-    print(extended_gcb(a, b))
-    d, x, y = extended_gcb(a, b)
+    print(extended_gcd(a, b))
+    d, x, y = extended_gcd(a, b)
     print(d == x * a + y * b)
     a, b = 73, 40
-    print(extended_gcb(a, b))
-    d, x, y = extended_gcb(a, b)
+    print(extended_gcd(a, b))
+    d, x, y = extended_gcd(a, b)
     print(d == x * a + y * b)
     print('-----------------  check  ---------------------')
     # print(naive_check(6967))
@@ -133,3 +133,5 @@ if __name__ == '__main__':
     print('--------------  pow mod  --------------')
     x, p, n = 31, 7, 541
     print((x ** p) % n == pow_mod_large(x, p, n))
+    print(gcd(23 * 29, 3))
+    print(3%1)
