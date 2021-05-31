@@ -10,7 +10,7 @@ from sympy import Symbol, diff, init_printing, init_session, Matrix, lambdify, v
 
 
 # ****************************************  derivative  ***************************************
-def secant(x0, x1):
+def secant(f, x0, x1):
     return (f(x1) - f(x0)) / (x1 - x0)
 
 
@@ -175,6 +175,74 @@ def cross(f, guess=(-1, 1), landa=1e-10, epsilon=1e-10, max_iter=100):
     return x_history
 
 
+def jacoby(A, b, w=1, max_iter=50, eps=1e-7, landa=1e-7, norm_ord=np.inf):
+    A, b, L, D, U, DL_, C, x = __gauss_seidel_jacoby_init(A, b, gauss_seidel=False)
+
+    x_next = None
+    for i in range(max_iter):
+        x_next = -DL_ @ U @ x + C
+        # print(x, x_next)
+        if np.linalg.norm(x_next - x, ord=norm_ord) < eps or np.linalg.norm(A @ x - A @ x_next, ord=norm_ord) < landa:
+            print('stop in iter: ', i)
+            break
+        x = x_next
+
+    return x_next
+
+
+def gauss_seidel(A, b, w=1, max_iter=50, eps=1e-7, landa=1e-7, norm_ord=np.inf):
+    """
+    compute x for A @ x = b
+
+    :param A: matrix
+    :param b: vector
+    :param w:
+    :param max_iter:
+    :param eps:
+    :param landa:
+    :param norm_ord: norm for vector option:
+        norm_ord=1, norm 1: ||x||=sum(abs(x))
+        norm_ord=2, norm 2: ||x||=sum(x^2)^0.5
+        norm_ord=np.inf, norm inf: ||x||=max(abs(x))
+
+    :return: x: vector of result that A @ x = b
+
+    :complexity: O(max_iter * n^3) where n size of b is n
+    """
+    A, b, L, D, U, D_, C, x = __gauss_seidel_jacoby_init(A, b, gauss_seidel=True)
+
+    x_next = None
+    for i in range(max_iter):
+        x_next = -D_ @ (L + U) @ x + C
+        # print(x, x_next)
+        if np.linalg.norm(x_next - x, ord=norm_ord) < eps or np.linalg.norm(A @ x - A @ x_next, ord=norm_ord) < landa:
+            print('stop in iter: ', i)
+            break
+        x = x_next
+
+    return x_next
+
+
+def __gauss_seidel_jacoby_init(A, b, gauss_seidel=True):
+    """
+    init parameters for jacoby or gauss_seidel
+
+    :param A: matrix
+    :param b: vector
+    :param gauss_seidel: if gauss_seidel: D_=D^-1
+                         if jacoby: D_=(D+L)^-1
+
+    :return: x that A @ x = b
+
+    :complexity: O(n^3) where n size of b is n
+    """
+    A, b = np.array(A, dtype=np.float64), np.array(b, dtype=np.float64)
+    L, D, U = np.tril(A, k=-1), np.diag(np.diag(A)), np.triu(A, k=1)
+    D_ = np.linalg.pinv(D) if gauss_seidel else np.linalg.pinv(D + L)
+    C, x = D_ @ b, np.random.rand(A.shape[0])
+    return A, b, L, D, U, D_, C, x
+
+
 # ***************************************  The order/constant of convergence  ***************************************
 def convergence_order(x_history):
     """
@@ -253,72 +321,83 @@ def analyze_result(x_history, f):  # analyze result
 
 # ***************************************  main  ***************************************
 if __name__ == '__main__':
-    np.vectorize(f1)
-    np.vectorize(f2)
-    np.vectorize(f3)
-
-    x = sp.symarray('x', 3)
-    f_1 = x[0] ** 2
-    f_2 = x[1] ** 2
-    f_3 = x[2] ** 2
-    funcs = [f_1, f_2, f_3]
-    guess = [-2, 1, 3]
-    x_history = newton_raphson_sympy(funcs, x, guess)
-    print(x_history)
-    funcs_ = sp.lambdify(x, Matrix(funcs), 'numpy')
-    print(funcs_(*x_history[-1]).tolist())
-
-    # f, df, it, lamda, epsilon = f5, df5, 5, 1e-7, 1e-7
-    cross(sp.lambdify(x[0], x[0] ** 2 - 900, 'numpy'), [-0.2, 45645], max_iter=350866)
-
-    # ******************************  analyze  *********************************
-    f, df, x, itr, lamda, epsilon = f5, df5, sp.symbols('x'), 20, 1e-7, 1e-7
-    f_ = x ** 4 - 4 * x ** 3 + x ** 2
-
-    # plot graph of f(x)
-    points = np.linspace(-1, 3.8, num=10000)
-    np.vectorize(f)
-    plt.plot(points, f(points))
-    plt.xlabel('x')
-    plt.ylabel('f(x)')
-    plt.title('f(x) = x^4 - 4x^3 + x^2')
-    plt.show()
-
-    x_history_sympy = newton_raphson_sympy([f_, ], [x, ], [1.0, ], landa=lamda, epsilon=epsilon, max_iter=itr)
-    error_sympy, p_sympy, c_sympy = convergence_order(x_history_sympy)
-    x_sympy = x_history_sympy[-1]
-    x_history_newton = newton_raphson(f, df, [1.0, ], landa=lamda, epsilon=epsilon, max_iter=itr)
-    error_newton, p_newton, c_newton = convergence_order(x_history_newton)
-    x_newton = x_history_newton[-1]
-    x_history_secant = newton_raphson_secant(f, 1., landa=lamda, epsilon=epsilon, max_iter=itr)
-    error_secant, p_secant, c_secant = convergence_order(x_history_secant)
-    x_secant = x_history_secant[-1]
-    x_history_cross = cross(f, [-20., 20.], landa=lamda, epsilon=epsilon, max_iter=itr)
-    # x_history_cross = np.array(x_history_cross)
-    # idx = np.argmin([f(x_history_cross[:, 0]), f(x_history_cross[:, 1])], axis=0)
-    # x_history_cross = np.array(x_history_cross)[:, idx]
-    error_cross, p_cross, c_cross = convergence_order(x_history_cross)
-    x_cross = x_history_cross[-1]
-
-    # plot error
-    # plt.plot(range(len(error_sympy)), error_sympy)
-    plt.plot(range(len(error_newton)), error_newton)
-    plt.plot(range(len(error_secant)), error_secant)
-    plt.plot(range(len(error_cross)), error_cross)
-    plt.grid(ls='--')
-    plt.xlabel('Iteration')
-    plt.ylabel('Error')
-    plt.legend(['e Newton', 'e Secant', 'e cross l', 'e cross r'])  # 'e sympy',
-    plt.show()
-
-    # plot p
-    # plt.plot(range(2, len(p_sympy) + 2), p_sympy)
-    plt.plot(range(2, len(p_newton) + 2), p_newton)
-    plt.plot(range(2, len(p_secant) + 2), p_secant)
-    plt.plot(range(2, len(p_cross) + 2), p_cross)
-    plt.xlabel('Iterations')
-    plt.ylabel('p')
-    plt.title('The order of convergence')
-    plt.legend(['p Newton', 'p Secant', 'p cross l', 'p cross r'])  # 'p sympy',
-    plt.grid(ls='--')
-    plt.show()
+    # np.vectorize(f1)
+    # np.vectorize(f2)
+    # np.vectorize(f3)
+    #
+    # x = sp.symarray('x', 3)
+    # f_1 = x[0] ** 2
+    # f_2 = x[1] ** 2
+    # f_3 = x[2] ** 2
+    # funcs = [f_1, f_2, f_3]
+    # guess = [-2, 1, 3]
+    # x_history = newton_raphson_sympy(funcs, x, guess)
+    # print(x_history)
+    # funcs_ = sp.lambdify(x, Matrix(funcs), 'numpy')
+    # print(funcs_(*x_history[-1]).tolist())
+    #
+    # # f, df, it, lamda, epsilon = f5, df5, 5, 1e-7, 1e-7
+    # cross(sp.lambdify(x[0], x[0] ** 2 - 900, 'numpy'), [-0.2, 45645], max_iter=350866)
+    #
+    # # ******************************  analyze  *********************************
+    # f, df, x, itr, lamda, epsilon = f5, df5, sp.symbols('x'), 20, 1e-7, 1e-7
+    # f_ = x ** 4 - 4 * x ** 3 + x ** 2
+    #
+    # # plot graph of f(x)
+    # points = np.linspace(-1, 3.8, num=10000)
+    # np.vectorize(f)
+    # plt.plot(points, f(points))
+    # plt.xlabel('x')
+    # plt.ylabel('f(x)')
+    # plt.title('f(x) = x^4 - 4x^3 + x^2')
+    # plt.show()
+    #
+    # x_history_sympy = newton_raphson_sympy([f_, ], [x, ], [1.0, ], landa=lamda, epsilon=epsilon, max_iter=itr)
+    # error_sympy, p_sympy, c_sympy = convergence_order(x_history_sympy)
+    # x_sympy = x_history_sympy[-1]
+    # x_history_newton = newton_raphson(f, df, [1.0, ], landa=lamda, epsilon=epsilon, max_iter=itr)
+    # error_newton, p_newton, c_newton = convergence_order(x_history_newton)
+    # x_newton = x_history_newton[-1]
+    # x_history_secant = newton_raphson_secant(f, 1., landa=lamda, epsilon=epsilon, max_iter=itr)
+    # error_secant, p_secant, c_secant = convergence_order(x_history_secant)
+    # x_secant = x_history_secant[-1]
+    # x_history_cross = cross(f, [-20., 20.], landa=lamda, epsilon=epsilon, max_iter=itr)
+    # # x_history_cross = np.array(x_history_cross)
+    # # idx = np.argmin([f(x_history_cross[:, 0]), f(x_history_cross[:, 1])], axis=0)
+    # # x_history_cross = np.array(x_history_cross)[:, idx]
+    # error_cross, p_cross, c_cross = convergence_order(x_history_cross)
+    # x_cross = x_history_cross[-1]
+    #
+    # # plot error
+    # # plt.plot(range(len(error_sympy)), error_sympy)
+    # plt.plot(range(len(error_newton)), error_newton)
+    # plt.plot(range(len(error_secant)), error_secant)
+    # plt.plot(range(len(error_cross)), error_cross)
+    # plt.grid(ls='--')
+    # plt.xlabel('Iteration')
+    # plt.ylabel('Error')
+    # plt.legend(['e Newton', 'e Secant', 'e cross l', 'e cross r'])  # 'e sympy',
+    # plt.show()
+    #
+    # # plot p
+    # # plt.plot(range(2, len(p_sympy) + 2), p_sympy)
+    # plt.plot(range(2, len(p_newton) + 2), p_newton)
+    # plt.plot(range(2, len(p_secant) + 2), p_secant)
+    # plt.plot(range(2, len(p_cross) + 2), p_cross)
+    # plt.xlabel('Iterations')
+    # plt.ylabel('p')
+    # plt.title('The order of convergence')
+    # plt.legend(['p Newton', 'p Secant', 'p cross l', 'p cross r'])  # 'p sympy',
+    # plt.grid(ls='--')
+    # plt.show()
+    print('-----------  new  -------------------')
+    A, b = np.array([[2, -1], [1, 2]]), np.array([1, 3])
+    # print(np.linalg.solve(A, b))
+    gauss_seidel(A, b)
+    jacoby(A, b)
+    # print(np.sum(b ** 2) ** 0.5)
+    # print(np.linalg.norm(b, ), '\n')
+    # print(np.abs(np.max(b)))
+    # print(np.linalg.norm(b, ord=np.inf), '\n')
+    # print(np.sum(np.abs(b)))
+    # print(np.linalg.norm(b, ord=1), '\n')

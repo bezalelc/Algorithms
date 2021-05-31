@@ -114,7 +114,7 @@ def solve(A, b, disassembly=None):
         disassembly A to L,U,pi => L @ U = A[pi] =>  (L @ U) @ x = b[pi]
         solve L @ y = b[pi]
         solve U @ x = y
-
+        return x
 
     :complexity: O(n^2) if L,U,pi given else O(n^3)
     """
