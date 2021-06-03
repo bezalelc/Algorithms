@@ -430,3 +430,9 @@ if __name__ == '__main__':
     points = [(x_i, np.cos(x_i)) for x_i in points]
     p, df, n, c = newton(points), sp.sin, 2, np.pi / 2
     # print(err_max(n, np.array(points)[:, 0], df, c))
+    print('-------------------------------------------')
+    x, rang_, n = sp.symbols('x'), (0, 1), 2
+    f = sp.lambdify(x, np.e ** (x ** 2), 'numpy')
+    print(lagrangh([(0, f(0)), (0.5, f(0.5)), (1, f(1))]))
+    # print(chebyshev_root(n + 1, 0, 1))
+    # print(newton(chebyshev_root(n + 1, *rang_)))

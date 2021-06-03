@@ -58,7 +58,7 @@ def mult_coefficient(A, B):
     return C
 
 
-def mult_fft(P1, P2):
+def mult_fft(P1, P2, round=0):
     """
     multiply to Polynomials that represent by vector of Coefficients
         for example: Polynomial P1= 1-2x+3x^2 => P1=[1,-2,3]
@@ -75,9 +75,12 @@ def mult_fft(P1, P2):
     """
     P1, P2 = np.array(P1), np.array(P2)
     P1, P2 = np.append(P1, np.zeros((P2.shape[0],))), np.append(P2, np.zeros((P1.shape[0],)))
-    DFT1, DFT2 = fft.fft(P1), fft.fft(P2)  # np.fft.fft(P1), np.fft.fft(P2)
+    DFT1, DFT2 = fft.fft(P1, round=round), fft.fft(P2, round=round)  # np.fft.fft(P1), np.fft.fft(P2)
     # DFT1, DFT2 = np.fft.fft(P1), np.fft.fft(P2)  # np.fft.fft(P1), np.fft.fft(P2)
-    coeff = fft.fft_reverse(DFT1 * DFT2)
+    # if round != 0:
+    #     DFT1, DFT2 = np.around(DFT1, decimals=round), np.around(DFT2, decimals=round)
+    #     DFT1, DFT2 = np.trim_zeros(DFT1, trim='b'), np.trim_zeros(DFT2, trim='b')
+    coeff = fft.fft_reverse(DFT1 * DFT2, round=round)
     # coeff = np.fft.ifft(DFT1 * DFT2)
     return coeff if coeff[-1] != 0 else coeff[:np.where(coeff == 0)[0][-1]]
 

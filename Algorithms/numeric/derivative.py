@@ -7,7 +7,7 @@ import sympy as sp
 from Algorithms.polynomial import interpolation as inter
 
 
-def dimple_diff(f, x, h=1e-2):
+def simple_diff(f, x, h=1e-2):
     """
     simple derivative
         can be numeric error if h vary small
@@ -100,3 +100,9 @@ def richardson(f, x0, h=1e-2, diff=bi_directional_diff, m=3):  # , data=None
         D[i:, i] = 4 ** i / (4 ** i - 1) * D[i:, i - 1] - (1 / (4 ** i - 1)) * D[i - 1:-1, i - 1]
 
     return D
+
+
+if __name__ == '__main__':
+    x = sp.symbols('x')
+    f = sp.lambdify(x, sp.ln(x), 'numpy')
+    print(richardson(f, 3, h=1, m=4))

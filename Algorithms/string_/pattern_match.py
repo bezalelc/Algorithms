@@ -142,14 +142,55 @@ def fft_match(T, P):
 
     :complexity: O(m*log(n)) where n,m=len(T),len(P)
     """
-    n = np.unique(list("oiuhni")).shape[0]
-    
-    pass
+    # T, P = T[::-1], P[::-1]
+    char_list_t, char_list_p = list(T), list(P)
+    char_unique = np.unique(char_list_t + char_list_p)  # sorted unique chars
+    n = char_unique.shape[0]
+    # if n & (n - 1) and n != 0:
+    #     n = 1 << (n - 1).bit_length()
+    # print('n=', n)
+    roots = unity_roots(n)
+    char_roots = {c: root for c, root in zip(char_unique, roots)}
+    T_, P_ = np.array([char_roots[c] for c in T]), np.array([char_roots[c] for c in P])
+    import multiply
+
+    df1, df2 = np.fft.fft(np.append(T_, np.zeros(P_.shape[0]))), np.fft.fft(np.append(P_, np.zeros(T_.shape[0])))
+    PT = np.fft.ifft(df1 * df2)
+    conv1 = np.around(np.array(np.real(PT), dtype=np.int_))
+    conv1 = np.trim_zeros(np.around(np.array(np.real(PT), dtype=np.int_)), trim='b')
+
+    conv2 = multiply.mult_fft(P_, T_)
+    conv2 = np.array(np.real(conv2), dtype=np.int_)
+    conv2 = np.trim_zeros(conv2, trim='b')
+    print(conv2.shape, len(T), len(P))
+    conv3 = np.array(np.real(multiply.mult_coefficient(P_, T_)), dtype=np.int_)
+    conv3 = np.trim_zeros(np.array(np.real(multiply.mult_coefficient(P_, T_)), dtype=np.int_), trim='b')
+    print(conv1, np.array(np.where(np.abs(conv1) == len(P))) - len(P) + 1)
+    print(conv2, np.array(np.where(np.abs(conv2) == len(P))) - len(P) + 1)
+    print(conv3, np.array(np.where(np.abs(conv3) == len(P))) - len(P) + 1)
+
+    # print(np.argwhere(np.abs(conv[::-1]) == len(P)).reshape((-1,)))
+
+
+# ******************************************  help method  **************************************
+def unity_roots(n):
+    """
+    compute the unity toots fo Rank(n)
+
+    :param n: rank of complex polynomial x^n=1
+
+    :return: unity roots
+
+    :complexity: O(n)
+    """
+    k = np.arange(n)
+    theta = (2 * np.pi * k) / n
+    roots = np.cos(theta) + np.sin(theta) * 1j
+    return roots
 
 
 if __name__ == '__main__':
-
-    T, P = 'aabababbababaaaababbbabaaabababab', 'abab'
+    T, P = 'aabababbababaaaababbbabaaabababab', 'aa'
     print(naive_match(T, P))
     print(rabin_karp_match(T, P, q=10))
     print(KMP(T, P))
@@ -168,3 +209,9 @@ if __name__ == '__main__':
 
     P = 'ababbabbabbababbabb'
     print(PI(P))
+
+    print('\n----------------  fft match test  ---------------')
+    T, P = 'bababbabbbaaa', 'baa'
+    fft_match(T, P)
+    print(KMP(T, P))
+    print(naive_match(T, P))

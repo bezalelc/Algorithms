@@ -2,7 +2,6 @@ import numpy as np
 import sympy as sp
 from sympy import integrate
 import Algorithms.polynomial.interpolation as inter
-import math
 
 
 def newton_cotes(func=None, points=None, n=2, inter_method=inter.newton, range_=(-1, 1)):
@@ -159,10 +158,9 @@ def romberg(func, m=3, range_=(-1, 1), integrate_=simpson):
     return R
 
 
-# def f(func, n=2, range_=(-1, 1)):
-
-
 if __name__ == '__main__':
+    import math
+
     x = sp.symbols('x')
     print('--------------------------------   test 1   --------------------------------')
     f, rang_ = sp.lambdify(x, sp.sin(x), "numpy"), (0, 1)
@@ -192,3 +190,15 @@ if __name__ == '__main__':
     f, rang_, real_value = sp.lambdify(x, 1 / (x + 1), "numpy"), (0, 1), math.log(2)
     print(romberg(f, range_=(0, 1), integrate_=trapeze, m=3)[-1, -1])
     print(f'real value={real_value}')
+
+    print('--------------------------------   test trapeze   --------------------------------')
+    f, rang_, real_value = sp.lambdify(x, sp.exp(x ** 2), "numpy"), (0, 1), math.log(2)
+    print(trapeze(f, n=3, range_=rang_))
+    print(simpson(f, n=1, range_=rang_))
+    print(romberg(f, 4, range_=rang_, integrate_=trapeze))
+    # print(f'real value={real_value}')
+    # err = []
+    # for i in range(1, 10):
+    #     val = trapeze(f, n=i, range_=(0, 1))
+    #     err.append(np.abs(val - real_value))
+    #     print(f'for n={i}: val={val}, err={err[-1]}')
