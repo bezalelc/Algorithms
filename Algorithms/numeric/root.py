@@ -82,6 +82,10 @@ def newton_raphson(f, jacobi, guess, landa=1e-10, epsilon=1e-10, max_iter=100):
     """
     # -------------  init  ---------------------------
     x_n = np.array(guess, dtype=np.float64)  # if guess is not None else np.random.rand(len(guess))
+    try:
+        _ = iter(x_n)
+    except TypeError:
+        x_n = np.array([guess, ], dtype=np.float64)
     x_history = [x_n.copy()]  # , f_history, x_err_history, p, c = [x_n.copy()], [], [-f(*x_n) / jacobi(*x_n)], [], []
 
     # --------------  calc  ------------------------
@@ -167,9 +171,6 @@ def cross(f, guess=(-1, 1), landa=1e-10, epsilon=1e-10, max_iter=100):
 
         x_history.append((x_l, x_r))
         if np.abs(f_xr - f_xl) < landa and np.abs(x_r - x_l) < epsilon:
-            # print('iter:', i)
-            # print('np.abs(f_xr - f_xl) < landa:', np.abs(f_xr - f_xl) < landa)
-            # print('np.abs(x_r - x_l) < epsilon:', np.abs(x_r - x_l) < epsilon)
             break
 
     return x_history
