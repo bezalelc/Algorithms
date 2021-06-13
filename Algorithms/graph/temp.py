@@ -5,9 +5,26 @@ import dfs, mst
 
 def f(G: Graph, s: Vertex):
     _, G_mst = mst.prim(G, True)
-    print(G_mst)
+    # print(G_mst)
     # print(dfs.dfs(G, s))
     # print(dfs.dfs(G_mst, s))
+
+
+def wvc_1(G: Graph):
+    min_wvc = float('inf')
+
+
+
+def wvc_2():
+    pass
+
+
+def wvc_3():
+    pass
+
+
+def f2():
+    pass
 
 
 if __name__ == '__main__':
@@ -33,3 +50,8 @@ if __name__ == '__main__':
     G.connect(from_=V[2], to=V[4], weight=8)
     # ---------------------
     f(G, V[0])
+    print('---------------------  wvc  ------------------------')
+    G = GraphNotAimed()
+    V = [Vertex(name=str(i)) for i in range(4)]
+    # G.connect(V[0],V[1],weight=)
+    print('---------------------  f2  ------------------------')

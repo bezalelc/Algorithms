@@ -15,10 +15,10 @@ class Edge:
 
 
 class Vertex:
-    def __init__(self, name=None, data=None, Adj=None, edges=None):
+    def __init__(self, name=None, data=None, Adj=None, edges=None, weight=None):
         self.Adj: Dict[Vertex, Edge]
         self.edges: Dict[Edge, Vertex]
-        self.name, self.data, self.Adj, self.edges = name, data, Adj, edges
+        self.name, self.data, self.Adj, self.edges, self.weight = name, data, Adj, edges, weight
         self.data = data if data else {}
         self.Adj = Adj if Adj else {}
         self.edges = edges if edges else {}
