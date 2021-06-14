@@ -13,7 +13,7 @@ def lup(A, eps=1e-7):
 
     :complexity: O(n^3)
     """
-    A = np.array(A)
+    A = np.array(A, dtype=np.float64)
     LU, pi, n = A.copy(), np.arange(A.shape[0]), A.shape[0]
 
     for k in range(n):
@@ -25,7 +25,6 @@ def lup(A, eps=1e-7):
         if k != k_:
             pi[k], pi[k_] = pi[k_], pi[k]
             LU[[k, k_]] = LU[[k_, k]]
-
         LU[k + 1:, k] /= LU[k, k]
         LU[k + 1:, k + 1:] = LU[k + 1:, k + 1:] - LU[k + 1:, k][:, None] @ LU[k, k + 1:][:, None].T
 
@@ -174,3 +173,11 @@ if __name__ == '__main__':
     print(np.array_equal(np.around(x, decimals=10), np.around(np.linalg.solve(A, b), decimals=10)))
     print(x)
     print(np.linalg.solve(A, b))
+    print('------------  solve  ----------------')
+    A, b = np.array([[2, 1, 0], [1, 2, 1], [0, 1, 2]]), np.array([1, 0, 1])
+    # print(A, b)
+    # print(lup__(A)[0], '\n')
+    # print(lup__(A)[1], '\n')
+    # print(lup__(A)[2], '\n')
+    L, U, pi = lup(A)
+    print(L @ U, b[pi])
