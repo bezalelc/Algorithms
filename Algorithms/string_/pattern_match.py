@@ -215,3 +215,6 @@ if __name__ == '__main__':
     fft_match(T, P)
     print(KMP(T, P))
     print(naive_match(T, P))
+    print('-----------  temp  -------------')
+    print(KMP("ABCABCABCABC", "ABCABCD"))
+    print(PI("ABCABCD"))

@@ -70,7 +70,6 @@ def lup__(A, eps=1e-7):
     """
     A = np.array(A)
     LU, pi, n = A.copy(), np.arange(A.shape[0]), A.shape[0]
-    # L, U, pi, n = np.zeros(A.shape), np.zeros(A.shape), np.arange(A.shape[0]), A.shape[0]
 
     for k in range(n):
         p, k_ = 0, k
@@ -81,13 +80,10 @@ def lup__(A, eps=1e-7):
         if p < eps:
             print("no solution")
             return False
-        # print(f'--------  {k}  -------------')
-        # print(LU)
-        # print(p, pi, k, k_, '\n')
+
         pi[k], pi[k_] = pi[k_], pi[k]
         LU[[k, k_]] = LU[[k_, k]]
-        # print(LU)
-        # print(p, pi, k, k_, '\n')
+
 
         for i in range(k + 1, n):
             LU[i, k] /= LU[k, k]
@@ -180,4 +176,14 @@ if __name__ == '__main__':
     # print(lup__(A)[1], '\n')
     # print(lup__(A)[2], '\n')
     L, U, pi = lup(A)
-    print(L @ U, b[pi])
+    print(L)
+    print(U)
+    print(pi)
+    print(solve(A, b, disassembly=[L, U, pi]))
+    # print(L @ U, b[pi])
+    # print('------------  solve  ----------------')
+    # A = np.array([[1, 2, 0], [3, 4, 4], [5, 6, 3]], dtype=np.float64)
+    # L, U,pi = lup(A)
+    # print(L)
+    # print(U)
+    # print(pi)

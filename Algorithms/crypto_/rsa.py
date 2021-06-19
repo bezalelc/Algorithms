@@ -1,5 +1,4 @@
 import numpy as np
-# import crypto_.prime as prime
 import prime
 
 

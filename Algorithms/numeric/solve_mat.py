@@ -2,6 +2,19 @@ import numpy as np
 
 
 def thomas(A, b):
+    """
+    solve A @ x = b for Three-diagonal matrix
+
+
+    :param A: matrix in size n x n
+    :param b: vector in size n x 1
+
+    :return: x => solution vector in size n x 1
+
+    :complexity:
+        run-time => O(n^3)
+        memory => O(n)
+    """
     A, b, n = np.array(A, dtype=np.float64), np.array(b, dtype=np.float64), len(b)
     A, b, d, a, r, x = np.c_[A, b], np.diag(A, k=-1), np.diag(A), np.diag(A, k=1).copy(), b.copy(), np.empty(n)
 

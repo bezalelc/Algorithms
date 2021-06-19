@@ -3,10 +3,7 @@ Author: Bezalel Cohen
 """
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy as sc
-import sympy as sp
-from numpy.lib import math
-from sympy import Symbol, diff, init_printing, init_session, Matrix, lambdify, vector
+from sympy import Matrix, lambdify
 
 
 # ****************************************  derivative  ***************************************
@@ -177,12 +174,12 @@ def cross(f, guess=(-1, 1), landa=1e-10, epsilon=1e-10, max_iter=100):
 
 
 def jacoby(A, b, w=1, max_iter=50, eps=1e-7, landa=1e-7, norm_ord=np.inf):
-    A, b, L, D, U, DL_, C, x = __gauss_seidel_jacoby_init(A, b, gauss_seidel=False)
+    A, b, L, D, U, D_, C, x = __gauss_seidel_jacoby_init(A, b, gauss_seidel=False)
 
     x_next = None
+    D_LU = -D_ @ (L + U)
     for i in range(max_iter):
-        x_next = -DL_ @ U @ x + C
-        # print(x, x_next)
+        x_next = D_LU @ x + C
         if np.linalg.norm(x_next - x, ord=norm_ord) < eps or np.linalg.norm(A @ x - A @ x_next, ord=norm_ord) < landa:
             print('stop in iter: ', i)
             break
@@ -210,16 +207,44 @@ def gauss_seidel(A, b, w=1, max_iter=50, eps=1e-7, landa=1e-7, norm_ord=np.inf):
 
     :complexity: O(max_iter * n^3) where n size of b is n
     """
-    A, b, L, D, U, D_, C, x = __gauss_seidel_jacoby_init(A, b, gauss_seidel=True)
+    A, b, L, D, U, DL_, C, x = __gauss_seidel_jacoby_init(A, b, gauss_seidel=True)
 
     x_next = None
+    DL_U = -(DL_ @ U)
     for i in range(max_iter):
-        x_next = -D_ @ (L + U) @ x + C
-        # print(x, x_next)
+        x_next = DL_U @ x + C
         if np.linalg.norm(x_next - x, ord=norm_ord) < eps or np.linalg.norm(A @ x - A @ x_next, ord=norm_ord) < landa:
             print('stop in iter: ', i)
             break
         x = x_next
+
+    return x_next
+
+
+def gauss_seidel_jacoby(A, b, w=1, max_iter=50, eps=1e-7, landa=1e-7, norm_ord=np.inf, gauss_seidel=True):
+    A, b, L, D, U, D_, C, x = __gauss_seidel_jacoby_init(A, b, gauss_seidel)
+
+    x_next = None
+    T = -(D_ @ U) if gauss_seidel else -D_ @ (L + U)
+
+    # check
+    print(f'T inf norm: ||T||={np.max(np.sum(np.abs(T), axis=1))}')
+    print(f'T 1 norm: ||T||={np.max(np.sum(np.abs(T), axis=0))}')
+    print(f'if and only if: {max(np.linalg.svd(T)[1])} < 1 <=> convergence')
+    import fractions
+    np.set_printoptions(formatter={'all': lambda x: str(fractions.Fraction(x).limit_denominator())})
+    T, C = np.around(T, decimals=5), np.around(C, decimals=5)
+    print('C=', C)
+    print('T=', T)
+    # loop
+    x = np.array([0., 0., 0.])
+    for i in range(2):
+        x_next = T @ x + C
+        print(f'i={i}, x=', x_next)
+        if np.linalg.norm(x_next - x, ord=norm_ord) < eps or np.linalg.norm(A @ x - A @ x_next, ord=norm_ord) < landa:
+            print('stop in iter: ', i)
+            break
+        x = np.around(x_next, decimals=5)
 
     return x_next
 
@@ -239,7 +264,7 @@ def __gauss_seidel_jacoby_init(A, b, gauss_seidel=True):
     """
     A, b = np.array(A, dtype=np.float64), np.array(b, dtype=np.float64)
     L, D, U = np.tril(A, k=-1), np.diag(np.diag(A)), np.triu(A, k=1)
-    D_ = np.linalg.pinv(D) if gauss_seidel else np.linalg.pinv(D + L)
+    D_ = np.linalg.pinv(D + L) if gauss_seidel else np.linalg.pinv(D)
     C, x = D_ @ b, np.random.rand(A.shape[0])
     return A, b, L, D, U, D_, C, x
 
@@ -402,3 +427,16 @@ if __name__ == '__main__':
     # print(np.linalg.norm(b, ord=np.inf), '\n')
     # print(np.sum(np.abs(b)))
     # print(np.linalg.norm(b, ord=1), '\n')
+    print('---------------------------- gauss jacobi --------------------------')
+    A, b = [[2, -1, 0], [-1, 2, -1], [0, -1, 2]], [1, 0, 1]
+    print('--  jacoby:')
+    print(jacoby(A, b, eps=1e-15, landa=1e-15, max_iter=10000))
+    print('--  gauss_seidel:')
+    print(gauss_seidel(A, b, eps=1e-15, landa=1e-15, max_iter=10000))
+    print('---------------------------- T norm--------------------------')
+    print(gauss_seidel_jacoby(A, b, gauss_seidel=True))
+    print('---------------------------- ex --------------------------')
+    A, b = [[2, 1, 0], [1, 2, 1], [0, 1, 2]], [1, 0, 1]
+    print(gauss_seidel_jacoby(A, b, gauss_seidel=True, eps=1e-15, landa=1e-15, max_iter=999))
+    # print(np.linalg.pinv(A))
+    # print(1 / np.array(A))

@@ -80,7 +80,7 @@ def mult_fft(P1, P2, round=0):
     # if round != 0:
     #     DFT1, DFT2 = np.around(DFT1, decimals=round), np.around(DFT2, decimals=round)
     #     DFT1, DFT2 = np.trim_zeros(DFT1, trim='b'), np.trim_zeros(DFT2, trim='b')
-    coeff = fft.fft_reverse(DFT1 * DFT2, round=round)
+    coeff = fft.fft_reverse(DFT1 * DFT2, round_=round)
     # coeff = np.fft.ifft(DFT1 * DFT2)
     return coeff if coeff[-1] != 0 else coeff[:np.where(coeff == 0)[0][-1]]
 

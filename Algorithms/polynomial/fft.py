@@ -34,7 +34,6 @@ def fft(coeff, round=0):
         n = coeff.shape[0]
         y, y0, y1 = np.empty((n,), dtype=np.complex256), fft_rec(coeff[::2]), fft_rec(coeff[1::2])
         roots = unity_roots(n)
-
         for k in range(n):
             y[k] = y0[k % (n // 2)] + y1[k % (n // 2)] * roots[k]
 
@@ -70,19 +69,20 @@ def fft(coeff, round=0):
     return fft_rec(coeff)
 
 
-def fft_reverse(DFT, round=0):
+def fft_reverse(DFT, round_=0):
     """
     FFT^-1 algorithm to calculate the Coefficients polynomial in values representation
 
     :param DFT: polynomial in DFT representation
-    :param round: <int between 1 to max digits> round the solution with <round> digits
+    :param round_: <int between 1 to max digits> round the solution with <round> digits
                   example: if x=[1.0001, 2.3456] and round =2 then x will be [1., 2.34]
 
     :return: polynomial in Coefficients representation
 
     :complexity: O(n*log(n))
     """
-    b = fft(DFT, round=round)
+    b = fft(DFT, round=round_)
+    print(b)
     b[1:] = b[1:][::-1]
     return b / DFT.shape[0]
 
@@ -110,3 +110,5 @@ if __name__ == '__main__':
     print(np.convolve([1, 2, 3], [-1, 3, 2]))
     fft_conv = np.around(multiply.mult_fft([1, 2, 3], [-1, 3, 2]))
     print(np.array(fft_conv[fft_conv != 0], dtype=np.int_), np.real(fft_conv[fft_conv != 0]))
+    # print(fft(np.array([81, 9 + 40j, 1, 9 - 40j], dtype=np.complex256)))
+    # print(fft_reverse(np.array([81, 9 + 40j, 1, 9 - 40j], dtype=np.complex256)))
