@@ -142,34 +142,23 @@ def fft_match(T, P):
 
     :complexity: O(m*log(n)) where n,m=len(T),len(P)
     """
-    # T, P = T[::-1], P[::-1]
     char_list_t, char_list_p = list(T), list(P)
     char_unique = np.unique(char_list_t + char_list_p)  # sorted unique chars
+
     n = char_unique.shape[0]
-    # if n & (n - 1) and n != 0:
-    #     n = 1 << (n - 1).bit_length()
-    # print('n=', n)
+    if n & (n - 1) and n != 0:
+        n = 1 << (n - 1).bit_length()
     roots = unity_roots(n)
     char_roots = {c: root for c, root in zip(char_unique, roots)}
-    T_, P_ = np.array([char_roots[c] for c in T]), np.array([char_roots[c] for c in P])
+    T_, P_ = np.array([char_roots[c] for c in T]), np.array([char_roots[c] for c in P])[::-1]
     import multiply
 
-    df1, df2 = np.fft.fft(np.append(T_, np.zeros(P_.shape[0]))), np.fft.fft(np.append(P_, np.zeros(T_.shape[0])))
-    PT = np.fft.ifft(df1 * df2)
-    conv1 = np.around(np.array(np.real(PT), dtype=np.int_))
-    conv1 = np.trim_zeros(np.around(np.array(np.real(PT), dtype=np.int_)), trim='b')
-
-    conv2 = multiply.mult_fft(P_, T_)
-    conv2 = np.array(np.real(conv2), dtype=np.int_)
-    conv2 = np.trim_zeros(conv2, trim='b')
-    print(conv2.shape, len(T), len(P))
-    conv3 = np.array(np.real(multiply.mult_coefficient(P_, T_)), dtype=np.int_)
-    conv3 = np.trim_zeros(np.array(np.real(multiply.mult_coefficient(P_, T_)), dtype=np.int_), trim='b')
-    print(conv1, np.array(np.where(np.abs(conv1) == len(P))) - len(P) + 1)
-    print(conv2, np.array(np.where(np.abs(conv2) == len(P))) - len(P) + 1)
-    print(conv3, np.array(np.where(np.abs(conv3) == len(P))) - len(P) + 1)
-
-    # print(np.argwhere(np.abs(conv[::-1]) == len(P)).reshape((-1,)))
+    # dft_t, dft_p = fft.fft(T_), fft.fft(P_)
+    # res = fft.fft_reverse(dft_p * dft_t)
+    res = multiply.mult_fft(T_, P_)
+    res = np.around(np.real(res), decimals=1)
+    res = np.argwhere(res == len(P)) - len(P) + 1
+    return res.reshape((-1,))
 
 
 # ******************************************  help method  **************************************
@@ -218,3 +207,7 @@ if __name__ == '__main__':
     print('-----------  temp  -------------')
     print(KMP("ABCABCABCABC", "ABCABCD"))
     print(PI("ABCABCD"))
+    print('-----------  temp  -------------')
+    T, P = 'aabababab', 'ab'
+    print(KMP(T, P))
+    print(fft_match(T, P))

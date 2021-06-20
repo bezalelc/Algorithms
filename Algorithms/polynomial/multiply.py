@@ -198,3 +198,5 @@ if __name__ == '__main__':
     print('-------------------  mult fft mult_large_num test 1  ----------------------------')
     a, b = 6586546, 79658485
     print(a * b, mult_large_num(a, b))
+    a, b = 729, 11
+    print(a * b, mult_large_num(a, b))

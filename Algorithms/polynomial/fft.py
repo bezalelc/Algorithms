@@ -82,7 +82,6 @@ def fft_reverse(DFT, round_=0):
     :complexity: O(n*log(n))
     """
     b = fft(DFT, round=round_)
-    print(b)
     b[1:] = b[1:][::-1]
     return b / DFT.shape[0]
 
