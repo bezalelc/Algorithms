@@ -112,3 +112,4 @@ if __name__ == '__main__':
     print(np.array(fft_conv[fft_conv != 0], dtype=np.int_), np.real(fft_conv[fft_conv != 0]))
     # print(fft(np.array([81, 9 + 40j, 1, 9 - 40j], dtype=np.complex256)))
     # print(fft_reverse(np.array([81, 9 + 40j, 1, 9 - 40j], dtype=np.complex256)))
+

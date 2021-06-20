@@ -99,8 +99,9 @@ def pow_mod_large(x, p, n):
     pow_a = np.empty((m,), dtype=np.int_)
 
     for i in range(m):
-        pow_a[i] = x
+        pow_a[i] = x % n
         x = x ** 2 % n
+    print(pow_a)
 
     pow_a[~mask] = 1
     for i in range(1, m):
@@ -134,4 +135,4 @@ if __name__ == '__main__':
     print((x ** p) % n == pow_mod_large(x, p, n))
     print(gcd(23 * 29, 3))
     print(3 % 1)
-    print(pow_mod_large(71, 11, 143))
+    print(pow_mod_large(81, 81, 7))

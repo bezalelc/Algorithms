@@ -131,8 +131,8 @@ def KMP(T, P):
                 q += 1
             else:
                 res_indexes.append(s)
-                s += (m - pi[q - 1])
-                q = pi[q - 1]
+                s += (m - pi[m - 1])
+                q = pi[m - 1]
         else:
             if q > 0:
                 s += (q - pi[q - 1])
@@ -174,4 +174,4 @@ C = (100 ** P[1]) % P[0]
 print((C ** S[1]) % S[0])
 print('---------------  ex  ----------------')
 # print(KMP("aaaabcabcabcaaa", "abcabc"))
-print(KMP("ABCABCABCABCABCABC", "ABCABCD"))
+print(KMP("aaaaaaaaaa", "aaaa"))
