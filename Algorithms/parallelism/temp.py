@@ -97,6 +97,29 @@ def merge(a, i, mid, j):
     a[i_:j + 1] = b
 
 
+# ***************************************  p-sum of vector  *********************************
+def sum_(a):
+    q = queue.Queue()
+
+    def __sum(i, j):
+        if i == j:
+            return q.put(a[i])
+        if i >= j:
+            return
+
+        # mid = (i+j) // 2
+        # print(i,i+mid)
+        # print(mid+1,j)
+        # t1 = Thread(target=__sum, args=(i, i + mid))
+        # t2 = Thread(target=__sum, args=(mid+1, j))
+        # t1.start(),t2.start()
+        # t1.join(),t2.join()
+        # x,y=q.get(),q.get()
+        # q.put(x+y)
+    # __sum(0,len(a)-1)
+    return q.get()
+
+
 # ***************************************  main  *********************************
 if __name__ == '__main__':
     """
@@ -125,3 +148,5 @@ def f():
     A, v = np.array([[1, 2, 4], [2, 3, 4], [5, 6, 7]]), np.array([1, 2, 3])
     print(A @ v)
     print(mult_mat_vec(A, v))
+    print('-----------------  sum of vector  -----------------------')
+    # print(sum_(np.array([1, 2, 3, 4, 5, 6])))

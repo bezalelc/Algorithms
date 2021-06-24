@@ -78,20 +78,21 @@ def rabin_karp_match(T, P, q=101):
     chars = np.unique(list(T))
     d = chars.shape[0]
     map_char_val = {c: i for c, i in zip(chars, range(d))}
-    print(map_char_val)
+    # print(map_char_val)
     # -----
 
     # h = (d ** (m - 1)) % q in base d
     h, p, t = 1, 0, 0
     for i in range(m - 1):
         h = (d * h) % q
+
     for c1, c2, i in zip(T, P, range(m)):
         t = (t * d + map_char_val[c1]) % q
         p = (p * d + map_char_val[c2]) % q
 
     res_indexes = []
     for i in range(n - m + 1):
-        print(t)
+        print(i + 1, ": ", t)
         if t == p:
             found = True
             for c1, c2 in zip(P, T[i:m + i]):
@@ -122,7 +123,6 @@ def KMP(T, P):
         worst-case:O(2m+n)
     """
     n, m, s, q, pi = len(T), len(P), 0, 0, PI(P)
-    print(pi)
 
     res_indexes = []
     while s <= n - m:
@@ -168,11 +168,72 @@ def PI(P):
     return pi
 
 
-P, S = keys()
-# import Algorithms.crypto_.rsa as rsa
-C = (100 ** P[1]) % P[0]
-print((C ** S[1]) % S[0])
-print('---------------  ex  ----------------')
-# print(KMP("aaaabcabcabcaaa", "abcabc"))
-print(KMP("aaaaaaaaaa", "aaaa"))
-PI('ababbaab')
+def fft_match(T, P):
+    """
+    find Sub-shows of P inside T using fft
+
+    @param:
+        @T: long string_ to search P inside
+        @P: short string_ to search inside T
+
+    :return: list of indexes where P found in T, index of the first char mach
+
+    :complexity: O(m*log(n)) where n,m=len(T),len(P)
+    """
+    char_list_t, char_list_p = list(T), list(P)
+    char_unique = np.unique(char_list_t + char_list_p)  # sorted unique chars
+
+    n = char_unique.shape[0]
+    if n & (n - 1) and n != 0:
+        n = 1 << (n - 1).bit_length()
+
+    import Algorithms.string_.pattern_match
+    roots = Algorithms.string_.pattern_match.unity_roots(n)
+    char_roots = {c: root for c, root in zip(char_unique, roots)}
+    T_, P_ = np.array([char_roots[c] for c in T]), np.array([char_roots[c] for c in P])[::-1]
+    import multiply
+
+    # dft_t, dft_p = fft.fft(T_), fft.fft(P_)
+    # res = fft.fft_reverse(dft_p * dft_t)
+    res = multiply.mult_fft(T_, P_)
+    res = np.around(np.real(res), decimals=1)
+    res = np.argwhere(res == len(P)) - len(P) + 1
+    # res = res[res >= 0]
+    # res = res[len(T) - len(P) >= res]
+    return res.reshape((-1,))
+
+
+def f(A, B):
+    i, j = 0, 0
+    while i < len(A) and j < len(B):
+        if A[i] == B[j]:
+            return True
+    if A[i] < B[j]:
+        i += 1
+    else:
+        j += 1
+
+    return False
+
+
+# P, S = keys()
+# # import Algorithms.crypto_.rsa as rsa
+# C = (100 ** P[1]) % P[0]
+# print((C ** S[1]) % S[0])
+# print('---------------  ex  ----------------')
+# # print(KMP("aaaabcabcabcaaa", "abcabc"))
+# print(KMP("aaaaaaaaaa", "aaaa"))
+# PI('ababbaab')
+# print(prime.is_prime(213))
+# print(prime.is_prime_naive(213))
+# print('----------------------')
+# T, P = 'aaaaaaaa', 'aaa'
+# print(KMP(T, P))
+# print(rabin_karp_match(T, P))
+# print('--------------')
+# T, P = 'bab', 'ab'
+# print(fft_match(T, P))
+# # print(rabin_karp_match('aaababaabbbaaababaab', 'abaab', 11))
+# print(-205%616)
+T, P = 'abcabcabcd', 'abcabc'
+print(fft_match(T, P))

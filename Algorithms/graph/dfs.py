@@ -1,5 +1,4 @@
 from Algorithms.structure.graph_struct import Graph, Vertex
-import numpy as np
 from typing import Union, Tuple
 
 

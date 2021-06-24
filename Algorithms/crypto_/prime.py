@@ -101,9 +101,9 @@ def pow_mod_large(x, p, n):
     for i in range(m):
         pow_a[i] = x % n
         x = x ** 2 % n
-    print(pow_a)
 
     pow_a[~mask] = 1
+
     for i in range(1, m):
         pow_a[i] = (pow_a[i - 1] * pow_a[i]) % n
 
@@ -136,3 +136,5 @@ if __name__ == '__main__':
     print(gcd(23 * 29, 3))
     print(3 % 1)
     print(pow_mod_large(81, 81, 7))
+    print(pow_mod_large(5, 29, 30))
+    print(extended_gcd(396, 317))
