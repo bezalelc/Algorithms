@@ -97,7 +97,6 @@ def newton(points):
     for i in range(M.shape[0]):
         for j in range(1, i + 1):
             M[i, j] = (M[i, j - 1] - M[i - 1, j - 1]) / (X[i] - X[i - j])
-
     x = sp.symbols('x')
     P, p = M[0, 0], 1
     for coef, x_i in zip(np.diag(M)[1:], X):
@@ -436,3 +435,4 @@ if __name__ == '__main__':
     print(lagrangh([(0, f(0)), (0.5, f(0.5)), (1, f(1))]))
     # print(chebyshev_root(n + 1, 0, 1))
     # print(newton(chebyshev_root(n + 1, *rang_)))
+    print(newton([(1, 1), (2, 3), (4, 6), (3, 9)]))

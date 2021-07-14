@@ -7,7 +7,6 @@ import sympy
 # print(np.hstack((x, y[:, None])))
 
 
-import numpy as np
 import Algorithms.crypto_.prime as prime
 
 
@@ -235,5 +234,19 @@ def f(A, B):
 # print(fft_match(T, P))
 # # print(rabin_karp_match('aaababaabbbaaababaab', 'abaab', 11))
 # print(-205%616)
-T, P = 'abcabcabcd', 'abcabc'
-print(fft_match(T, P))
+# T, P = 'abcabcabcd', 'abcabc'
+# print(fft_match(T, P))
+
+import fractions
+from fractions import Fraction as Fr
+
+# def print(x):
+#     print(fractions.Fraction(x).limit_denominator())
+
+
+p, q = Fr(5, 10), Fr(4, 10)
+p1, p2 = Fr(4, 10), Fr(3, 10)
+x = 3 ** 2 / 6 ** 3
+print(x)
+print(x.__float__())
+print(Fr(x).limit_denominator())
