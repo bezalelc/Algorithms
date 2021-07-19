@@ -436,3 +436,4 @@ if __name__ == '__main__':
     # print(chebyshev_root(n + 1, 0, 1))
     # print(newton(chebyshev_root(n + 1, *rang_)))
     print(newton([(1, 1), (2, 3), (4, 6), (3, 9)]))
+    print(C_poly([(1, 1), (2, 3), (3, 9), (4, 6)], 3, np.dot))

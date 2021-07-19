@@ -12,29 +12,6 @@ from sklearn.datasets import make_blobs
 from sklearn.mixture import GaussianMixture
 
 
-class GMM():
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.X, self.EPOCHS = [], 100
-        self.mu, self.sigma, self.pi = [], [], []
-
-    def compile(self):
-        pass
-
-    def fit(self):
-        pass
-
-    def predict(self):
-        pass
-
-    def cost(self):
-        pass
-
-    def loss(self):
-        pass
-
-
 def mixture(X, k, epoch=30):
     """
     Gaussian Mixture Models
@@ -138,7 +115,6 @@ def mixture_plot(X, k, epoch=5):
     X_sort = np.sort(X, axis=0)
     x, y = np.meshgrid(X_sort[:, 0], X_sort[:, 1])
     XY = np.array([np.array([x.flatten(), y.flatten()])]).T.reshape((m ** 2, n))
-
 
     # plt.figure(figsize=(8, 8))
     # plt.scatter(X[:, 0], X[:, 1])

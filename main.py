@@ -250,3 +250,4 @@ x = 3 ** 2 / 6 ** 3
 print(x)
 print(x.__float__())
 print(Fr(x).limit_denominator())
+print(np.linalg.pinv([[2, 0], [4, 8]]))

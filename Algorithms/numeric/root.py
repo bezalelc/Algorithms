@@ -4,6 +4,7 @@ Author: Bezalel Cohen
 import numpy as np
 import matplotlib.pyplot as plt
 from sympy import Matrix, lambdify
+import sympy as sp
 
 
 # ****************************************  derivative  ***************************************
@@ -440,3 +441,10 @@ if __name__ == '__main__':
     print(gauss_seidel_jacoby(A, b, gauss_seidel=True, eps=1e-15, landa=1e-15, max_iter=999))
     # print(np.linalg.pinv(A))
     # print(1 / np.array(A))
+    x, y = sp.symbols('x'), sp.symbols('y')
+    f1, f2 = 2 * x + y ** 2 - 5, x / 2 + y - 1
+    # f1, f2 = sp.lambdify([x, y], f1, 'numpy'), sp.lambdify([x, y], f2, 'numpy')
+    # j=sp.
+    print(newton_raphson_sympy([f1, f2], [x, y], guess=[5, 1], max_iter=20, landa=1e-10, epsilon=1e-10))
+    print(sp.lambdify([x, y], f1, 'numpy')(8 / 3, -1 / 3))
+    print(sp.lambdify([x, y], f2, 'numpy')(8 / 3, -1 / 3))
