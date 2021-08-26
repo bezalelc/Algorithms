@@ -7,8 +7,14 @@ import numpy as np
 
 
 def accuracy(y, predict):
-    y, predict = prepare_data(y), prepare_data(predict)
+    y, predict = _prepare_data(y), _prepare_data(predict)
     return np.mean(predict == y)
+
+
+def null_accuracy(y):
+    y = _prepare_data(y)
+    k = np.unique(y)
+    return np.mean(y[:, None] == k, axis=0)
 
 
 def confusion_matrix(y, predict):
@@ -25,7 +31,7 @@ def confusion_matrix(y, predict):
 
     :complexity: O(m^2) where m in number of examples
     """
-    y, predict = prepare_data(y), prepare_data(predict)
+    y, predict = _prepare_data(y), _prepare_data(predict)
     m, k = y.shape[0], np.unique(y).shape[0]
     y, predict = np.array(y[:], dtype=np.uint8).reshape((-1,)), np.array(predict[:], dtype=np.uint8).reshape((-1,))
     M = np.zeros((k, k), dtype=np.float64)
@@ -116,7 +122,51 @@ def F_score(y, predict, beta=1):
     return ((1 + beta ** 2) * recall_ * precision_) / (beta ** 2 * precision_ + recall_)
 
 
-def prepare_data(a):
+def roc(y, predict, k_pos=1, thresholds_num=100, t=None):
+    """
+    calculate the connection between the recall ond false positive rate (=False alarms)
+    according to the chosen threshold
+    for good model the recall is close to 1 even where the FTP is small
+
+    :param
+        y: true label for examples
+        predict: predict label for examples
+        k_pos: class chosen for test
+        thresholds_num: number of thresholds
+
+    :return:
+        false positive rate, true positive rate, thresholds
+    """
+    fpr, tpr = np.empty((thresholds_num,)), np.empty((thresholds_num,))
+    thresholds = np.linspace(start=0, stop=1, num=thresholds_num, endpoint=True)[::-1] ** 22
+
+    predict = predict[:, k_pos]
+    for i, x in enumerate(thresholds):
+        p = predict > x
+        fpr[i], tpr[i] = false_positive_rate(y, p)[k_pos], recall(y, p)[k_pos]
+
+    idx = np.argsort(fpr).reshape((-1,))
+    return fpr[idx], tpr[idx], thresholds[idx]
+
+
+def auc(y, predict, k_pos=1, thresholds_num=100):
+    """
+    calculate the area beneath the graph of roc_auc if area > 0.5 model is good
+
+    :param
+        y: true label for examples
+        predict: predict label for examples
+        k_pos: class chosen for test
+        thresholds_num: number of thresholds
+
+    :return:
+        area beneath the graph of roc_auc
+    """
+    fpr, tpr, _ = roc(y, predict, k_pos, thresholds_num)
+    return np.trapz(tpr, x=fpr)
+
+
+def _prepare_data(a):
     if len(a.shape) > 1:
         if a.shape[1] > 1:
             a = np.argmax(a, axis=1)

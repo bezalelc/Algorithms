@@ -1,14 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import io
-import loss
+import metrics
 
 
 def select_threshold(yval, pval):
     step = np.linspace(np.min(pval), np.max(pval), num=1001)  # np.max(pval) - np.min(pval) / 1000
     eps, best_score = step[0], 0
     for s in step:
-        score = loss.F_score(yval, pval < s)[1]
+        score = metrics.F_score(yval, pval < s)[1]
         if score > best_score:
             best_score = score
             eps = s
@@ -65,27 +65,27 @@ def test(path, plot_=False):
 
     # print loss
     print('normal:')
-    print('accuracy', loss.accuracy(yval, pval < eps), end=', ')
-    print('F_score', loss.F_score(yval, pval < eps), end=', ')
-    print('recall', loss.recall(yval, pval < eps), end=', ')
-    print('precision', loss.precision(yval, pval < eps), end=', ')
-    print('false_positive_rate', loss.false_positive_rate(yval, pval < eps))
+    print('accuracy', metrics.accuracy(yval, pval < eps), end=', ')
+    print('F_score', metrics.F_score(yval, pval < eps), end=', ')
+    print('recall', metrics.recall(yval, pval < eps), end=', ')
+    print('precision', metrics.precision(yval, pval < eps), end=', ')
+    print('false_positive_rate', metrics.false_positive_rate(yval, pval < eps))
 
     print('multivariate:')
-    print('accuracy', loss.accuracy(yval, p_multy_val < eps_multy), end=', ')
-    print('F_score', loss.F_score(yval, p_multy_val < eps_multy), end=', ')
-    print('recall', loss.recall(yval, p_multy_val < eps_multy), end=', ')
-    print('precision', loss.precision(yval, p_multy_val < eps_multy), end=', ')
-    print('false_positive_rate', loss.false_positive_rate(yval, p_multy_val < eps_multy))
+    print('accuracy', metrics.accuracy(yval, p_multy_val < eps_multy), end=', ')
+    print('F_score', metrics.F_score(yval, p_multy_val < eps_multy), end=', ')
+    print('recall', metrics.recall(yval, p_multy_val < eps_multy), end=', ')
+    print('precision', metrics.precision(yval, p_multy_val < eps_multy), end=', ')
+    print('false_positive_rate', metrics.false_positive_rate(yval, p_multy_val < eps_multy))
 
     print('multivariate simple sigma:')
     pval = multivariate_predict(Xval, mu, np.diag(sigma))
     ep = select_threshold(yval, pval)
-    print('accuracy', loss.accuracy(yval, pval < ep), end=', ')
-    print('F_score', loss.F_score(yval, pval < ep), end=', ')
-    print('recall', loss.recall(yval, pval < ep), end=', ')
-    print('precision', loss.precision(yval, pval < ep), end=', ')
-    print('false_positive_rate', loss.false_positive_rate(yval, pval < ep))
+    print('accuracy', metrics.accuracy(yval, pval < ep), end=', ')
+    print('F_score', metrics.F_score(yval, pval < ep), end=', ')
+    print('recall', metrics.recall(yval, pval < ep), end=', ')
+    print('precision', metrics.precision(yval, pval < ep), end=', ')
+    print('false_positive_rate', metrics.false_positive_rate(yval, pval < ep))
 
     if plot_:
         # plot hist

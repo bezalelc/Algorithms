@@ -3,7 +3,7 @@ import scipy as sc
 import scipy.io
 import matplotlib.pyplot as plt
 from sklearn import svm as sv
-import loss
+import metrics
 import karnel
 
 if __name__ == '__main__':
