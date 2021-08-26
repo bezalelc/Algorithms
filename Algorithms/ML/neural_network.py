@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sc
 from scipy import io
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
 # *******************************  activation  *****************************************
@@ -34,7 +35,7 @@ def grad(H, W, y, landa):
     K = np.arange(k)
     delta = [H[-1] - np.array(y == K[:, None])]
     dW = [delta[0] @ H[-2].T]
-    dW[0][1:, :] += W[-1][1:, :]
+    dW[0][1:, :] += landa * W[-1][1:, :]
     dW[0] /= m
 
     for h0, h1, w0, w1 in zip(H[:-2][::-1], H[1:-1][::-1], W[:-1][::-1], W[1:][::-1]):
@@ -84,66 +85,39 @@ def fit(X, y, W, landa, max_iter, activation):
 
 
 if __name__ == '__main__':
-    # init data/vars
-    data = sc.io.loadmat('/home/bb/Documents/octave/week5/machine-learning-ex4/ex4/ex4data1.mat')
-    X, y = data['X'], data['y']
-    # labels = np.unique(y)
-    # classes = {i: label for i, label in zip(range(len(labels)), labels)}
-    y += 9
-    y %= 10
-    y = y.reshape((-1,))
-    theta = sc.io.loadmat('/home/bb/Documents/octave/week5/machine-learning-ex4/ex4/ex4weights.mat')
-    W = [theta['Theta1'], theta['Theta2']]
+    df = pd.read_csv('/home/bb/Downloads/data/iris.data')
+    from scipy.stats import zscore
 
-    # while True:
-    #     plt.imshow(X[np.random.randint(5000), ::].reshape((20, 20)), cmap='gray')
-    #     plt.colorbar()
-    #     plt.show()
-    # network_sizes = [X.shape[1], 70, 80, 90, 100, 90, 80, 70, 50, 40, 30, 25, 25, 25, 10]
-    # W = compile(network_sizes, 0.12)
-    W = np.load('/home/bb/Downloads/W0.npy', allow_pickle=True)
-    # H = feedforward(W, X, sigmoid)
-    # cost(X, y, W, 1, sigmoid)
-    # grad(H, W, y, 0)
-    landa = 1
-    alpha = 1  # 0.001
+    z = np.abs(zscore(df.iloc[:, :4]))
+    z = np.abs(zscore(df.iloc[:, 1]))
 
-    J, W_history = [], []
-    for w in W:
-        print(w.shape)
+    median = df.iloc[np.where(z <= 3)[0], 1].median()
+    df.iloc[np.where(z > 3)[0], 1] = np.nan
+    df.fillna(median, inplace=True)
+    # z = np.abs(zscore(df.iloc[:, :4]))
 
-    print('before')
-    print(cost(X, y, W, landa, sigmoid))
-    p = predict(X, W, sigmoid)
-    print(np.mean(p == y), '\n')
-    for i in range(3):
-        H = feedforward(W, X, sigmoid)
-        W = backpropagation(H, y, W, landa, alpha)
-        J.append(cost(X, y, W, landa, sigmoid))
-    print('after')
-    p = predict(X, W, sigmoid)
-    # print(np.mean(p == y))
-    # print(np.mean(p == y))
-    # fit(X, y, W, landa, 34, sigmoid)
-    plt.plot(range(len(J)), J)
-    plt.show()
-    print(J[-1])
-    p = predict(X, W, sigmoid)
-    print(np.mean(p == y))
-    print(p)
-    print(y)
-    np.save('/home/bb/Downloads/W0.npy', W, allow_pickle=True)
+    # Save 6 samples as a holdout group to use only in the testing phase - don't touch it until you finish training and evaluating your model
+    df0 = df.sample(frac=0.96, random_state=42)
+    holdout = df.drop(df0.index)
+    # Seperate the feature columns (first 4) from the labels column (5th column)
+    x = df0.iloc[:, :4]
+    y = df0.iloc[:, 4]
+    x_standard = x.apply(zscore)
+    species_names = np.unique(np.array(y))
 
-    # dW = grad(H, W, y, landa)
-    # import copy
-    #
-    # W0, W1, W2 = copy.deepcopy(W), copy.deepcopy(W), copy.deepcopy(W)
-    # for i in range(len(W)):
-    #     W0[i] -= dW[i]
-    #     W2[i] += dW[i]
-    #
-    # J.append(cost(X, y, W0, landa, sigmoid))
-    # J.append(cost(X, y, W1, landa, sigmoid))
-    # J.append(cost(X, y, W2, landa, sigmoid))
-    # print((J[2] - J[0]) / (2))
-    # print(J[1])
+    # one hot encode the labels since they are categorical
+    y_cat = pd.get_dummies(y, prefix='cat')
+    y_cat.sample(10, random_state=42)
+    from sklearn.model_selection import train_test_split
+
+    x_train, x_test, y_train, y_test = train_test_split(x_standard, y_cat, test_size=0.5, random_state=42)
+    x_train, y_train = x_train.to_numpy(), np.argmax(y_train.to_numpy(), axis=1)
+    W = compile([4, 2, 2, 3], 0.12)
+    # print(model.W)
+    # print(model.predict(x_train))
+    print(W[0])
+    print('------------------------------------')
+    # feedforward(W,x_train)
+    # print(grad(y_train, landa=0)[0])
+    # print('------------------------------------')
+    # print(model.W[0])

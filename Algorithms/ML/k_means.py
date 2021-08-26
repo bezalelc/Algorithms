@@ -1,7 +1,6 @@
 """
 Author: Bezalel Cohen
 """
-# import matplotlib.pyplot as plt
 import imageio
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,14 +9,14 @@ from PIL import Image
 from Algorithms.ML.general import load_data
 
 
-def find_mean(X, k, epoch=100):
+def find_mean(X, k, epoch=100, eps=1.):
     """
     K-means algorithm:
 
     :param
         X: matrix of dataset [x(0).T,x(1).T,...,x(m).T]
         k: The desired number of dimensions
-        max_iter: max of iteration -> each iteration ini new random mean and try to find better mean
+        max_iter: max of iteration -> each iteration init new random mean and try to find better mean
 
     :return: u: (k x n) vector with mean of n feature for each k
 
@@ -42,9 +41,9 @@ def find_mean(X, k, epoch=100):
             y = np.argmin(w, axis=1)
 
             # --------
-            # plt.figure(figsize=(8, 6))
-            # c = ['r', 'g', 'b']
-            # print(u.shape,X.shape)
+            plt.figure(figsize=(14, 10))
+            c = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'brown', 'orange']
+            # print(u.shape, X.shape)
             # ---------
 
             # update u
@@ -55,20 +54,22 @@ def find_mean(X, k, epoch=100):
                 u[i] = np.mean(X[idx], axis=0)
 
                 # ----------
+                plt.scatter(X[idx, 0], X[idx, 1], marker='*', linewidths=1, color=c[i])
                 # plt.scatter(X[idx, 0], X[idx, 1], marker='*', linewidths=1, color=c[i])
-                # plt.scatter(X[idx, 0], X[idx, 1], marker='*', linewidths=1, color=c[i])
-                # plt.scatter(X[idx, 0], X[idx, 1], X[idx, 2], marker='*', linewidths=1)
-                # plt.scatter(u[i, 0], u[i, 1], u[i, 2], marker='o', linewidths=5)
-            # print(J(X,u))
-            # plt.show()
+                # plt.scatter(X[idx, 0], X[idx, 1], X[idx, 2], marker='*', linewidths=1, color=c[i])
+                plt.scatter(u[i, 0], u[i, 1], marker='o', linewidths=5, color=c[i])
+                # plt.scatter(u[i, 0], u[i, 1] , u[i, 2], marker='o', linewidths=5)
+            print(J(X, u), J(X, u_prev))
+            plt.show()
             # -----------
 
-            if np.array_equal(u, u_prev):
+            if np.array_equal(u, u_prev) or (eps and abs(J(X, u) - J(X, u_prev)) < eps):
                 break
             else:
                 u_prev = u.copy()
 
-        u_res = u_prev if J(X, u_prev) < J(X, u_res) else u_res
+        # u_res = u if J(X, u) < J(X, u_res) else u_res
+        u_res = min(u_res, u, key=lambda u_: J(X, u_))
 
     return u_res
 
@@ -147,39 +148,43 @@ if __name__ == '__main__':
     # print(np.mean(p == y))
     # best_mean(X,k_max=15)
     #
-    print('\n\n===================================== test ex1data2 =====================================')
-    import scipy.io
+    # print('\n\n===================================== test ex1data2 =====================================')
+    # import scipy.io
 
-    X = scipy.io.loadmat('/home/bb/Documents/octave/week8/machine-learning-ex7/ex7/ex7data2.mat')['X']
-    u = find_mean(X, 3, epoch=5)
+    # X = scipy.io.loadmat('/home/bb/Documents/octave/week8/machine-learning-ex7/ex7/ex7data2.mat')['X']
+    # u = find_mean(X, 3, epoch=5)
     # print(u)
-    # print('---------------------------------  test best_mean()  --------------------------')
-    # best_mean(X, k_max=14)
+    print('---------------------------------  test best_mean()  --------------------------')
 
-    print('---------------------------------  Reducing Image size  --------------------------')
+    from sklearn.datasets import make_blobs
+    from scipy.stats import multivariate_normal
 
-    # /home/bb/Documents/octave/week8/machine-learning-ex7/ex7/bird_small.png
-    # /home/bb/Downloads/IMG-20180617-WA0018 (copy).jpg
-    # img = imageio.imread('/home/bb/Documents/octave/week8/machine-learning-ex7/ex7/bird_small.png')
+    X, Y = make_blobs(cluster_std=0.7, random_state=20, n_samples=500, centers=7)
+    X = np.dot(X, np.random.RandomState(0).randn(2, 2))
+    y = np.random.randint(-10, 20, size=(12, 2))
+    find_mean(X, 7, epoch=1, eps=0.001)
+
+    # print('---------------------------------  Reducing Image size  --------------------------')
+    # img = imageio.imread('/home/bb/Pictures/img_crop.jpeg')
     # X = np.array(img, dtype=np.float128)
     # origin, D = np.array(X.copy(), dtype=np.uint8), X.shape
     # print(D)
     # X = X.reshape((X.shape[0] * X.shape[1], -1))
     # X = X / 255
-
-    # best_mean(X, 30)
-    # stop_condition1 = lambda X, u, j: J(X, u) != j
-    # stop_condition1 = lambda u, u_prev: np.array_equal(u, u_prev)
-
-    # u = find_mean(X, 16, max_iter=10)
+    #
+    # # best_mean(X, 30)
+    # # stop_condition1 = lambda X, u, j: J(X, u) != j
+    # # stop_condition1 = lambda u, u_prev: np.array_equal(u, u_prev)
+    #
+    # u = find_mean(X, 16, epoch=10)
     # p = predict(X, u)
     # u = np.round(u * 255)
     # img = np.array(np.reshape(u[p, :], D), dtype=np.uint8)
     #
     # img = Image.fromarray(img, 'RGB')
-    # img.save('/home/bb/Downloads/my1.png')
-    # # # img.show()
-    # #
+    # img.save('/home/bb/Pictures/compressed_kMeans.jpeg')
+    # img.show()
+    #
     # plt.figure()
     # plt.subplot(1, 2, 1)
     # plt.imshow(origin)

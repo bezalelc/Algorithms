@@ -130,7 +130,7 @@ if __name__ == '__main__':
     splines_mat = [cubicSplineMatrix(x, y) for x, y in zip(X, Y)]
 
     # plot - graph setup
-    plt.style.use('seaborn')
+    # plt.style.use('seaborn')
     z = np.linspace(-6, 6, 1000, dtype=np.float64)
     fig = plt.figure(figsize=(16, 12))
     for x, y, spline, spline_mat, i in zip(X, Y, splines, splines_mat, range(221, 225)):

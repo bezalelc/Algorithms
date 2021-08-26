@@ -26,30 +26,31 @@ def mixture(X, k, epoch=30):
     if len(X.shape) == 1:
         X = X.reshape((-1, 1))
     m, n = X.shape[0], X.shape[1]
-    pi, mu, sigma = np.ones((k,)) / k, np.random.rand(k, n) * np.mean(X), np.zeros(
-        (k, n, n)) + np.eye(n) * 5
-    sigma_reg = np.eye(n) * 1e-6
+    pi, mu, sigma = np.ones((k,)) / k, np.random.rand(k, n) * np.mean(X), np.zeros((k, n, n)) + np.eye(n) * 5
+    sigma_reg = np.eye(n) * 1e-6  # for numeric error
     w = np.empty((m, k))
     j_best = cost(X, pi, mu, sigma, w)
 
     while epoch:
         epoch -= 1
-        # E-step
-        sigma += sigma_reg
+
+        # Estimation-step
+        sigma += sigma_reg  # for numeric error
         w = Pr(X, mu, sigma, pr=w) * pi
         w = w / np.sum(w, axis=1)[:, None]
-        # M-step
+
+        # Maximization-step
         w_pere_k = np.sum(w, axis=0)
-        pi = w_pere_k / np.sum(w_pere_k)
+        pi = w_pere_k / m  # np.sum(w_pere_k)
         mu = (w.T @ X) / w_pere_k[:, None]
         for i in range(k):
             sigma[i] = (((w[:, i].reshape((-1, 1)) * (X - mu[i])).T @ (X - mu[i])) + sigma_reg) / w_pere_k[i]
 
         j = cost(X, pi, mu, sigma, w)
-        # print(j, j_best)
+        print(j, j_best)
         if j == j_best:
             break
-        elif j > j_best:
+        elif j < j_best:
             j_best = j
 
     return pi, mu, sigma
@@ -115,6 +116,7 @@ def mixture_plot(X, k, epoch=5):
     X_sort = np.sort(X, axis=0)
     x, y = np.meshgrid(X_sort[:, 0], X_sort[:, 1])
     XY = np.array([np.array([x.flatten(), y.flatten()])]).T.reshape((m ** 2, n))
+    c = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'brown', 'orange']
 
     # plt.figure(figsize=(8, 8))
     # plt.scatter(X[:, 0], X[:, 1])
@@ -155,8 +157,8 @@ def mixture_plot(X, k, epoch=5):
 
         w_plot = Pr(XY, mu, sigma, pr=w_plot)
         for mu_, s, i in zip(mu, sigma, range(k)):
-            fig1_111.contour(X_sort[:, 0], X_sort[:, 1], w_plot[:, i].reshape((m, m)), colors='black', alpha=0.3)
-            fig1_111.scatter(mu_[0], mu_[1], c='grey', zorder=10, s=100)
+            fig1_111.contour(X_sort[:, 0], X_sort[:, 1], w_plot[:, i].reshape((m, m)), colors=c[i], alpha=0.3)
+            fig1_111.scatter(mu_[0], mu_[1], c=c[i], zorder=10, s=100)
         plt.show()
 
     fig2 = plt.figure(figsize=(10, 10))
@@ -169,7 +171,7 @@ def mixture_plot(X, k, epoch=5):
     return pi, mu, sigma
 
 
-# --------------------------------------  main  --------------------------------------------
+# --------------------------------------  tester  --------------------------------------------
 if __name__ == '__main__':
     # print('\n\n===================================== test ex7data2 =====================================')
     import scipy.io
@@ -182,14 +184,14 @@ if __name__ == '__main__':
     from sklearn.datasets import make_blobs
     from scipy.stats import multivariate_normal
 
-    # X, Y = make_blobs(cluster_std=1.5, random_state=20, n_samples=500, centers=3)
-    # X = np.dot(X, np.random.RandomState(0).randn(2, 2))
-    # y = np.random.randint(-10, 20, size=(12, 2))
+    X, Y = make_blobs(cluster_std=0.9, random_state=20, n_samples=500, centers=7)
+    X = np.dot(X, np.random.RandomState(0).randn(2, 2))
+    y = np.random.randint(-10, 20, size=(12, 2))
+    pi, mu, sigma = mixture_plot(X, 7, epoch=50)
     # pi, mu, sigma = mixture(X, 3, epoch=50)
-    # pi, mu, sigma = mixture(X, 3, epoch=50)
-    #
-    # # print(predict(y, pi, mu, sigma))
-    #
+
+    # print(predict(y, pi, mu, sigma))
+
     # GMM = GaussianMixture(n_components=3)
     # GMM.fit(X)
     # # Y = np.random.randint(-10, 20, size=(1, 2))
@@ -199,40 +201,27 @@ if __name__ == '__main__':
 
     print('---------------------------------  Reducing Image size  --------------------------')
 
-    # /home/bb/Documents/octave/week8/machine-learning-ex7/ex7/bird_small.png
-    # /home/bb/Downloads/IMG-20180617-WA0018 (copy).jpg
-    img = imageio.imread('/home/bb/Documents/octave/week8/machine-learning-ex7/ex7/bird_small.png')
-    X = np.array(img, dtype=np.float128)
-    origin, D = np.array(X.copy(), dtype=np.uint8), X.shape
-    print(D)
-    X = X.reshape((X.shape[0] * X.shape[1], -1))
-    X = X / 255
-    pi, mu, sigma = mixture_plot(X[:, :2], 3, epoch=30)
-    # p = predict(X, pi, mu, sigma)
-    # print(mu)
-    #
-    # mu = np.round(mu * 255)
-    # img = np.array(np.reshape(mu[p, :], D), dtype=np.uint8)
-    #
-    # # Y = np.random.randint(-10, 20, size=(1, 2))
-    # GMM = GaussianMixture(n_components=16)
-    # GMM.fit(X)
-    # # p = GMM.predict(X)
-    # mu_ = GMM.means_
-    # print()
-    # print(mu_)
-    # # mu = np.round(mu * 255)
-    # # img = np.array(np.reshape(mu[p, :], D), dtype=np.uint8)
-    #
-    # img = Image.fromarray(img, 'RGB')
-    # # img.save('/home/bb/Downloads/mixture_bird.png')
-    # # # # img.show()
-    # # # #
-    # plt.figure()
-    # plt.subplot(1, 2, 1)
-    # plt.imshow(origin)
-    # plt.title('origin image')
-    # plt.subplot(1, 2, 2)
-    # plt.imshow(img)
-    # plt.title('compressed image')
-    # plt.show()
+    img = imageio.imread('/home/bb/Pictures/img_crop.jpeg')
+    X_ = np.array(img, dtype=np.float128)
+    origin, D = np.array(X_.copy(), dtype=np.uint8), X_.shape
+    X_ = X_.reshape((X_.shape[0] * X_.shape[1], -1))
+    X_ = X_ / 255
+    # pi_, mu_, sigma_ = mixture_plot(X_[:50, :2], 3, epoch=30)
+    pi_, mu_, sigma_ = mixture(X_, 32, epoch=15)
+
+    # restore img from array
+    p = predict(X_, pi_, mu_, sigma_)
+    mu_ = np.round(mu_ * 255)
+    img = np.array(np.reshape(mu_[p, :], D), dtype=np.uint8)
+    img = Image.fromarray(img, 'RGB')
+    img.save('/home/bb/Pictures/compressed_gmm.jpeg')
+
+    # plot
+    plt.figure(figsize=(10, 8))
+    plt.subplot(1, 2, 1)
+    plt.imshow(origin)
+    plt.title('origin image')
+    plt.subplot(1, 2, 2)
+    plt.imshow(img)
+    plt.title('compressed image')
+    plt.show()
