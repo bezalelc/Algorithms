@@ -11,15 +11,15 @@ if __name__ == '__main__':
     # data = sc.io.loadmat('/home/bb/Documents/octave/week7/machine-learning-ex6/ex6/ex6data1.mat')
     # X, y = data['X'], np.squeeze(data['y'])
     #
-    # model = sv.SVC(kernel='linear', C=0.2)
-    # model.fit(X, y)
+    # ML_ = sv.SVC(kernel='linear', C=0.2)
+    # ML_.fit(X, y)
     #
     # # plot Decision Boundary
     # min1, max1 = X[:, 0].min() - 1, X[:, 0].max() + 1
     # min2, max2 = X[:, 1].min() - 1, X[:, 1].max() + 1
     # xx, yy = np.meshgrid(np.arange(min1, max1, 0.01).flatten(), np.arange(min2, max2, 0.01).flatten())
     # grig = np.hstack((xx.flatten()[:, None], yy.flatten()[:, None]))
-    # zz = model.predict(grig).reshape(xx.shape)
+    # zz = ML_.predict(grig).reshape(xx.shape)
     # plt.contourf(xx, yy, zz, cmap='Paired')
     #
     # # plot points
@@ -29,23 +29,23 @@ if __name__ == '__main__':
     # plt.show()
     #
     # #loss
-    # print(loss.accuracy(y, model.predict(X)))
-    # print(loss.recall(y, model.predict(X)))
-    # print(loss.confusion_matrix(y, model.predict(X)))
-    # print(loss.F_score(y, model.predict(X)))
+    # print(loss.accuracy(y, ML_.predict(X)))
+    # print(loss.recall(y, ML_.predict(X)))
+    # print(loss.confusion_matrix(y, ML_.predict(X)))
+    # print(loss.F_score(y, ML_.predict(X)))
 
     # print('---------------------  ex6data2  -----------------------------')
     # data = sc.io.loadmat('/home/bb/Documents/octave/week7/machine-learning-ex6/ex6/ex6data2.mat')
     # X, y = data['X'], np.squeeze(data['y'])
-    # model = sv.SVC(kernel='rbf', C=40, gamma=500)
-    # model.fit(X, y)
+    # ML_ = sv.SVC(kernel='rbf', C=40, gamma=500)
+    # ML_.fit(X, y)
     #
     # # plot Decision Boundary
     # min1, max1 = X[:, 0].min() - 0.01, X[:, 0].max() + 0.01
     # min2, max2 = X[:, 1].min() - 0.01, X[:, 1].max() + 0.01
     # xx, yy = np.meshgrid(np.arange(min1, max1, 0.01).flatten(), np.arange(min2, max2, 0.01).flatten())
     # grig = np.hstack((xx.flatten()[:, None], yy.flatten()[:, None]))
-    # zz = model.predict(grig).reshape(xx.shape)
+    # zz = ML_.predict(grig).reshape(xx.shape)
     # plt.contourf(xx, yy, zz, cmap='Paired')
     #
     # # plot points
