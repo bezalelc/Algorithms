@@ -1,6 +1,7 @@
 import numpy as np
 from model import Model
-from lasso import Regularization, L1, L2
+import model
+from regularization import Regularization, L1, L2
 # import numba as nb
 # from numba import njit, jit, prange
 # from numba.experimental import jitclass
@@ -63,7 +64,7 @@ if __name__ == '__main__':
 
     # *********************    load the dataset   ***********************
     # get train size 5000 and test size 500
-    train_size, test_size = 1000, 200
+    train_size, test_size = 100, 20
     # train_size, test_size = 5000, 500
     classes = np.array(['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck'])
     path = data_paths['CIFAR10']
@@ -78,7 +79,7 @@ if __name__ == '__main__':
     # print(X.shape, y.shape, Xte.shape, Yte.shape)
 
     # *********************    train   ***********************
-    model = KNearestNeighbor()
+    model = model.KNearestNeighbor()
     model.train(X, y)
     # start = default_timer()
     pred = model.predict(Xte, k=60)
