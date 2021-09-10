@@ -14,14 +14,14 @@ def accuracy(y, predict):
 def null_accuracy(y):
     y = _prepare_data(y)
     k = np.unique(y)
-    return np.mean(y[:, None] == k, axis=0)
+    return np.mean(np.array(y)[:, None] == k, axis=0)
 
 
-def confusion_matrix(y, predict):
+def confusion_matrix(y, predict, count_mode=False):
     """
     compute the confusion matrix for classification
     rows->true labels
-    columns->model prediction labels
+    columns->ML_ prediction labels
 
     :param
         y: true label for examples
@@ -36,7 +36,10 @@ def confusion_matrix(y, predict):
     y, predict = np.array(y[:], dtype=np.uint8).reshape((-1,)), np.array(predict[:], dtype=np.uint8).reshape((-1,))
     M = np.zeros((k, k), dtype=np.float64)
     np.add.at(M, (y, predict), 1)
-    return M / m
+    if count_mode:
+        return M.astype(np.int)
+    else:
+        return M / m
 
 
 def recall(y, predict):
@@ -122,36 +125,45 @@ def F_score(y, predict, beta=1):
     return ((1 + beta ** 2) * recall_ * precision_) / (beta ** 2 * precision_ + recall_)
 
 
-def roc(y, predict, k_pos=1, thresholds_num=100, t=None):
+def roc(y, p, k, thresholds_num=100):
     """
     calculate the connection between the recall ond false positive rate (=False alarms)
     according to the chosen threshold
-    for good model the recall is close to 1 even where the FTP is small
+    for good ML_ the recall is close to 1 even where the FTP is small
 
     :param
         y: true label for examples
         predict: predict label for examples
-        k_pos: class chosen for test
+        k: number of classes
         thresholds_num: number of thresholds
 
     :return:
         false positive rate, true positive rate, thresholds
     """
-    fpr, tpr = np.empty((thresholds_num,)), np.empty((thresholds_num,))
+    # fpr, tpr = np.empty((thresholds_num,)), np.empty((thresholds_num,))
+    # thresholds = np.linspace(start=0, stop=1, num=thresholds_num, endpoint=True)[::-1] ** 22
+    #
+    # predict = predict[:, k_pos]
+    # for i, x in enumerate(thresholds):
+    #     p = predict > x
+    #     fpr[i], tpr[i] = false_positive_rate(y, p)[k_pos], recall(y, p)[k_pos]
+    #
+    # idx = np.argsort(fpr).reshape((-1,))
+    # return fpr[idx], tpr[idx], thresholds[idx]
+    fpr, tpr = np.empty((thresholds_num, k)), np.empty((thresholds_num, k))
     thresholds = np.linspace(start=0, stop=1, num=thresholds_num, endpoint=True)[::-1] ** 22
 
-    predict = predict[:, k_pos]
     for i, x in enumerate(thresholds):
-        p = predict > x
-        fpr[i], tpr[i] = false_positive_rate(y, p)[k_pos], recall(y, p)[k_pos]
+        p = p > x
+        fpr[i, :], tpr[i, :] = false_positive_rate(y, p), recall(y, p)
 
-    idx = np.argsort(fpr).reshape((-1,))
-    return fpr[idx], tpr[idx], thresholds[idx]
+    idx = fpr.argsort(axis=0), np.arange(fpr.shape[1])
+    return fpr[idx], tpr[idx], thresholds, idx
 
 
-def auc(y, predict, k_pos=1, thresholds_num=100):
+def auc(y, p, k, k_pos, thresholds_num=100):
     """
-    calculate the area beneath the graph of roc_auc if area > 0.5 model is good
+    calculate the area beneath the graph of roc_auc if area > 0.5 ML_ is good
 
     :param
         y: true label for examples
@@ -162,8 +174,8 @@ def auc(y, predict, k_pos=1, thresholds_num=100):
     :return:
         area beneath the graph of roc_auc
     """
-    fpr, tpr, _ = roc(y, predict, k_pos, thresholds_num)
-    return np.trapz(tpr, x=fpr)
+    fpr, tpr, _, idx = roc(y, p, k, thresholds_num)
+    return np.trapz(tpr[:, k_pos], x=fpr[:, k_pos])
 
 
 def _prepare_data(a):
