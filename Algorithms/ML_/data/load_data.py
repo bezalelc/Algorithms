@@ -3,6 +3,9 @@ import pickle
 import numpy as np
 import os
 
+"""
+CIFAR10 url => https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
+"""
 data_paths = {'CIFAR10': '/home/bb/Documents/python/Algorithms/Algorithms/ML_/data/cifar-10-batches-py'}
 
 
