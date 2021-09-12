@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from model import Model, SVM
-from regularization import Regularization, L1, L2, dL2
+from regularization import Regularization, L1, L2, L12
 # import numba as nb
 # from numba import njit, jit, prange
 # from numba.experimental import jitclass
@@ -57,12 +57,13 @@ X, Xv, Xte, Xd = X - mu, Xv - mu, Xte - mu, Xd - mu
 # lr, rg = SVM.ff(X, y, Xv, Yv, [1e-7, 1e-6],[2e4, 2.5e4, 3e4, 3.5e4, 4e4, 4.5e4, 5e4, 6e4])
 # print(lr, rg)
 model = SVM()
-model.compile(alpha=1e-7, lambda_=2.5e4, activation=Softmax, Reg=L2, dReg=dL2)
+model.compile(alpha=1e-7, lambda_=2, activation=Softmax, reg=L2)
 # model.compile(alpha=0, lambda_=0, activation=Hinge, Reg=L2, dReg=dL2)
-history = model.train(X, y, iter_=0, eps=0.0001)
+history = model.train(Xd, Yd, iter_=0, eps=0.0001)
 print(model.loss(model.X, model.y, add_ones=False), np.sum(model.grad(model.X, model.y, False)))
 L, dW = model.grad(model.X, model.y, True)
 print(L, np.sum(dW))
+# print(np.sum(model.W))
 
 # print(np.sum(model.grad(model.X, model.y, loss_=False)))
 # print(np.sum(model.grad1(model.X, model.y)))

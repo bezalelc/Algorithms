@@ -3,6 +3,9 @@ import abc
 
 
 class Activation(metaclass=abc.ABCMeta):
+    """
+    interface for activation classes
+    """
 
     @staticmethod
     @abc.abstractmethod
@@ -31,6 +34,9 @@ class Activation(metaclass=abc.ABCMeta):
 
 
 class Hinge(Activation):
+    """
+    hinge activation for svm
+    """
 
     @staticmethod
     def activation(X: np.ndarray, W: np.ndarray) -> np.ndarray:
