@@ -1,8 +1,16 @@
 import numpy as np
-from typing import NewType, Callable
+import abc
 
-Optimizer = NewType('Optimizer', Callable[[np.ndarray, np.ndarray], np.ndarray])
-# vanilla = Optimizer()
-# momentum = Optimizer()
-# ada_grad = Optimizer()
-# adam = Optimizer()
+
+class Optimizer(metaclass=abc.ABCMeta):
+    @staticmethod
+    @abc.abstractmethod
+    def opt(dW, alpha) -> np.ndarray:
+        pass
+
+
+class Vanilla(Optimizer):
+
+    @staticmethod
+    def opt(dW, alpha) -> np.ndarray:
+        return alpha * dW

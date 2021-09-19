@@ -35,3 +35,5 @@ def CIFAR_10() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     del X, Y
     Xte, Yte = CIFAR_10_batch(os.path.join(path, 'test_batch'))
     return Xtr, Ytr, Xte, Yte
+
+

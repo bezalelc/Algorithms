@@ -2,7 +2,7 @@ import numpy as np
 import abc
 
 
-class Activation(metaclass=abc.ABCMeta):
+class Activation_(metaclass=abc.ABCMeta):
     """
     interface for activation classes
     """
@@ -33,7 +33,7 @@ class Activation(metaclass=abc.ABCMeta):
         pass
 
 
-class Hinge(Activation):
+class Hinge_(Activation_):
     """
     hinge activation for svm
     """
@@ -45,9 +45,7 @@ class Hinge(Activation):
     @staticmethod
     def grad(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> np.ndarray:
         m = y.shape[0]
-        P = Hinge.activation(X, W)
-        P = P - P[np.arange(m), y].reshape((-1, 1)) + 1
-        P[P < 0], P[np.arange(m), y] = 0, 0
+        P = Hinge_.predict_matrix(X, W, y)
         P[P > 0] = 1
         P[np.arange(m), y] = - P.sum(axis=1)
         dW = X.T @ P / m
@@ -56,17 +54,13 @@ class Hinge(Activation):
     @staticmethod
     def loss(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> float:
         m = y.shape[0]
-        P = Hinge.activation(X, W)
+        P = Hinge_.activation(X, W)
         return np.sum(np.maximum(0, P - P[np.arange(m), y].reshape((-1, 1)) + 1)) / m - 1
 
     @staticmethod
     def loss_grad(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
         m = y.shape[0]
-        P = Hinge.activation(X, W)
-        P = P - P[np.arange(m), y].reshape((-1, 1)) + 1
-
-        # loss
-        P[P < 0], P[np.arange(m), y] = 0, 0
+        P = Hinge_.predict_matrix(X, W, y)
         L = np.sum(P) / m
 
         # grad
@@ -77,12 +71,17 @@ class Hinge(Activation):
         return L, dW
 
     @staticmethod
-    def loss_grad_loop(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
-        m, n, k = X.shape[0], X.shape[1], W.shape[1]
-
-        P = Hinge.activation(X, W)
+    def predict_matrix(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> np.ndarray:
+        m = y.shape[0]
+        P = Hinge_.activation(X, W)
         P = P - P[np.arange(m), y].reshape((-1, 1)) + 1
         P[P < 0], P[np.arange(m), y] = 0, 0
+        return P
+
+    @staticmethod
+    def loss_grad_loop(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
+        m, n, k = X.shape[0], X.shape[1], W.shape[1]
+        P = Hinge_.predict_matrix(X, W, y)
 
         L, dW = 0, np.zeros(W.shape)
         for i in range(m):
@@ -91,12 +90,13 @@ class Hinge(Activation):
                     dW[:, y[i]] -= X[i]
                     dW[:, j] += X[i]
                     L += P[i, j]
+                    print(X[i, 0])
 
         L, dW = L / m, dW / m
         return L, dW
 
 
-class Softmax(Activation):
+class Softmax_(Activation_):
 
     @staticmethod
     def activation(X: np.ndarray, W: np.ndarray) -> np.ndarray:
@@ -109,7 +109,7 @@ class Softmax(Activation):
     @staticmethod
     def grad(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> np.ndarray:
         m = y.shape[0]
-        P = Softmax.activation(X, W)
+        P = Softmax_.activation(X, W)
         P[np.arange(m), y] -= 1
         dW = X.T @ P / m
 
@@ -118,14 +118,14 @@ class Softmax(Activation):
     @staticmethod
     def loss(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> float:
         m = y.shape[0]
-        P = Softmax.activation(X, W)
+        P = Softmax_.activation(X, W)
         L = np.sum(-np.log(P[np.arange(m), y])) / m
         return float(L)
 
     @staticmethod
     def loss_grad(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
         m = y.shape[0]
-        P = Softmax.activation(X, W)
+        P = Softmax_.activation(X, W)
 
         # loss
         L = np.sum(-np.log(P[np.arange(m), y])) / m
@@ -149,7 +149,7 @@ class Softmax(Activation):
         """
         m, n, k = X.shape[0], X.shape[1], W.shape[1]
 
-        P = Softmax.activation(X, W)
+        P = Softmax_.activation(X, W)
 
         L, dW = 0, np.zeros(W.shape)
         for i in range(m):
@@ -162,30 +162,216 @@ class Softmax(Activation):
         L, dW = L / m, dW / m
         return L, dW
 
-# from typing import NewType, Callable
-# **********************   Activation   **********************************
-# hidden layers
-# Activation = NewType('Activation', Callable[[np.ndarray, int], np.ndarray])
-# sigmoid = Activation(lambda X, axis=-1: 1. / (1. + np.exp(-X)))
-# linear = Activation(lambda X, axis=-1: X)  # Regression
-# relu = Activation(lambda X, axis=-1: np.maximum(0, X))
-# leaky_relu = Activation(lambda X, axis=-1: np.where(X > 0, X, X * 0.01))
-# tanh = Activation(lambda X, axis=-1: np.tanh(X))
-# # # output layer
-# softmax = Activation(lambda X, axis=-1: np.exp(X) / np.sum(np.exp(X), axis=axis)[..., None])
-# logistic = Activation(lambda X, axis=-1: 1. / (1. + np.exp(-X)))
-# # softmax_ = Activation(lambda X: x=,)  # “softer” version of argmax
+
+# class Sigmoid(Activation):
 #
-# # **********************   Loss   **********************************
-# Loss = NewType('Loss', Callable[[np.ndarray, np.ndarray], np.ndarray])
-# hinge = Loss(lambda X, y: np.sum(np.maximum(0, X - X[np.arange(y.shape[0]), y].reshape((-1, 1)) + 1)) / y.shape[0] - 1)
-# cross_entropy = Loss(lambda X, y: np.sum(-np.log(X)[np.arange(y.shape[0]), y]) / y.shape[0])
-# # mse = Loss(lambda Z: np.sum() / Z.shape[1])
-# # binary_cross_entropy = Loss()
+#     @staticmethod
+#     def activation(X: np.ndarray, W: np.ndarray) -> np.ndarray:
+#         return 1. / (1. + np.exp(-(X @ W)))
+#
+#     @staticmethod
+#     def grad(X: np.ndarray, W: np.ndarray, H: np.ndarray) -> np.ndarray:
+#         # H = Sigmoid.activation(X, W)
+#         return (1 - H) * H
+#
+#     @staticmethod
+#     def loss(X: np.ndarray, W: np.ndarray, y: np.ndarray, pred=None) -> float:
+#         pass
+#
+#     @staticmethod
+#     def loss_grad(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
+#         pass
+#
+#     @staticmethod
+#     def loss_grad_loop(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
+#         pass
+#
+#
+# class ReLU(Activation):
+#     @staticmethod
+#     def activation(X: np.ndarray, W: np.ndarray, b=0) -> np.ndarray:
+#         return np.maximum(0, X + b)
+#
+#     @staticmethod
+#     def grad(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> np.ndarray:
+#         pass
+#
+#     @staticmethod
+#     def loss(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> float:
+#         pass
+#
+#     @staticmethod
+#     def loss_grad(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
+#         pass
+#
+#     @staticmethod
+#     def loss_grad_loop(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
+#         pass
 
-# **********************   derivative   **********************************
-# dLoss = NewType('dLoss', Callable[[np.ndarray, np.ndarray], np.ndarray])
-# grad_1 = dLoss(lambda X, f, h: (f(X + h) - f(X)) / h)
-# grad_2 = dLoss(lambda X, f, h: (f(X + h) - f(X - h)) / (2 * h))
 
-# d_hinge = dLoss(lambda X )
+class Activation(metaclass=abc.ABCMeta):
+    """
+    interface for activation classes
+    """
+
+    @staticmethod
+    @abc.abstractmethod
+    def activation(X: np.ndarray) -> np.ndarray:
+        """
+        activation
+        :param X: X@W+b
+        :return: activation(X@W+b)
+        """
+        pass
+
+    @staticmethod
+    @abc.abstractmethod
+    def grad(H: np.ndarray) -> np.ndarray:
+        """
+        gradient for specific activation
+
+        :param H: output of next layer
+
+        :return: gradient
+        """
+        pass
+
+    @staticmethod
+    @abc.abstractmethod
+    def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        """
+        delta for chain rule if the activation is the last layer
+        :param y: True classes
+        :param pred: prediction classes
+        :return: delta
+        """
+        pass
+
+    @staticmethod
+    @abc.abstractmethod
+    def loss(y: np.ndarray, pred: np.ndarray) -> float:
+        """
+        loss of activation if the activation is the last layer
+        :param y: True classes
+        :param pred: prediction classes
+        :return: loss
+        """
+        pass
+
+
+class Sigmoid(Activation):
+    @staticmethod
+    def activation(X: np.ndarray) -> np.ndarray:
+        return 1. / (1. + np.exp(-X))
+
+    @staticmethod
+    def grad(H: np.ndarray) -> np.ndarray:
+        return H * (1 - H)
+
+    @staticmethod
+    def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        m, k = pred.shape[0], pred.shape[1]
+        K = np.arange(k)
+        delta = pred - np.array(y[:, None] == K)
+        return delta
+
+    @staticmethod
+    def loss(y: np.ndarray, pred: np.ndarray) -> float:
+        m, k = pred.shape[:2]
+        K = np.arange(k)
+        pos = np.array(y == K[:, None]).T
+        J = -(np.sum(np.log(pred[pos])) + np.sum(np.log(1 - pred[~pos]))) / m
+        return J
+
+
+class Relu(Activation):
+    @staticmethod
+    def activation(X: np.ndarray) -> np.ndarray:
+        return np.maximum(0, X)
+
+    @staticmethod
+    def grad(H: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def loss(y: np.ndarray, pred: np.ndarray) -> float:
+        pass
+
+
+class Linear(Activation):
+    @staticmethod
+    def activation(X: np.ndarray) -> np.ndarray:
+        return X
+
+    @staticmethod
+    def grad(H: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def loss(y: np.ndarray, pred: np.ndarray) -> float:
+        pass
+
+
+class Softmax(Activation):
+    @staticmethod
+    def activation(X: np.ndarray) -> np.ndarray:
+        X = np.exp(X)
+        X /= np.sum(X, axis=1, keepdims=True)
+        return X
+
+    @staticmethod
+    def grad(H: np.ndarray) -> np.ndarray:
+        return H > 0
+
+    @staticmethod
+    def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        m = pred.shape[0]
+        delta = pred.copy()
+        delta[np.arange(m), y] -= 1
+        return delta
+
+    @staticmethod
+    def loss(y: np.ndarray, pred: np.ndarray) -> float:
+        m = pred.shape[0]
+        return float(np.sum(-np.log(pred[np.arange(m), y]))) / m
+
+
+class Hinge(Activation):
+
+    @staticmethod
+    def activation(X: np.ndarray) -> np.ndarray:
+        return X
+
+    @staticmethod
+    def grad(H: np.ndarray) -> np.ndarray:
+        return H
+
+    @staticmethod
+    def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        m = y.shape[0]
+        delta = Hinge.predict_matrix(y, pred)
+        delta[delta > 0] = 1
+        delta[np.arange(m), y] = - delta.sum(axis=1)
+        return delta
+
+    @staticmethod
+    def loss(y: np.ndarray, pred: np.ndarray) -> float:
+        m = y.shape[0]
+        return np.sum(Hinge.predict_matrix(y, pred)) / m
+        # return np.sum(np.maximum(0, pred - pred[np.arange(m), y].reshape((-1, 1)) + 1)) / m - 1
+
+    @staticmethod
+    def predict_matrix(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        m = y.shape[0]
+        P = pred.copy()
+        P = P - P[np.arange(m), y].reshape((-1, 1)) + 1
+        P[P < 0], P[np.arange(m), y] = 0, 0
+        return P
