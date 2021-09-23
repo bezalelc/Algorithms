@@ -163,52 +163,6 @@ class Softmax_(Activation_):
         return L, dW
 
 
-# class Sigmoid(Activation):
-#
-#     @staticmethod
-#     def activation(X: np.ndarray, W: np.ndarray) -> np.ndarray:
-#         return 1. / (1. + np.exp(-(X @ W)))
-#
-#     @staticmethod
-#     def grad(X: np.ndarray, W: np.ndarray, H: np.ndarray) -> np.ndarray:
-#         # H = Sigmoid.activation(X, W)
-#         return (1 - H) * H
-#
-#     @staticmethod
-#     def loss(X: np.ndarray, W: np.ndarray, y: np.ndarray, pred=None) -> float:
-#         pass
-#
-#     @staticmethod
-#     def loss_grad(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
-#         pass
-#
-#     @staticmethod
-#     def loss_grad_loop(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
-#         pass
-#
-#
-# class ReLU(Activation):
-#     @staticmethod
-#     def activation(X: np.ndarray, W: np.ndarray, b=0) -> np.ndarray:
-#         return np.maximum(0, X + b)
-#
-#     @staticmethod
-#     def grad(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> np.ndarray:
-#         pass
-#
-#     @staticmethod
-#     def loss(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> float:
-#         pass
-#
-#     @staticmethod
-#     def loss_grad(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
-#         pass
-#
-#     @staticmethod
-#     def loss_grad_loop(X: np.ndarray, W: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
-#         pass
-
-
 class Activation(metaclass=abc.ABCMeta):
     """
     interface for activation classes
@@ -284,24 +238,6 @@ class Sigmoid(Activation):
         return J
 
 
-class Relu(Activation):
-    @staticmethod
-    def activation(X: np.ndarray) -> np.ndarray:
-        return np.maximum(0, X)
-
-    @staticmethod
-    def grad(H: np.ndarray) -> np.ndarray:
-        pass
-
-    @staticmethod
-    def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
-        pass
-
-    @staticmethod
-    def loss(y: np.ndarray, pred: np.ndarray) -> float:
-        pass
-
-
 class Linear(Activation):
     @staticmethod
     def activation(X: np.ndarray) -> np.ndarray:
@@ -309,7 +245,7 @@ class Linear(Activation):
 
     @staticmethod
     def grad(H: np.ndarray) -> np.ndarray:
-        pass
+        return np.asarray(1.)
 
     @staticmethod
     def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
@@ -375,3 +311,114 @@ class Hinge(Activation):
         P = P - P[np.arange(m), y].reshape((-1, 1)) + 1
         P[P < 0], P[np.arange(m), y] = 0, 0
         return P
+
+
+class Tanh(Activation):
+    @staticmethod
+    def activation(X: np.ndarray) -> np.ndarray:
+        return np.tanh(X)
+
+    @staticmethod
+    def grad(H: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def loss(y: np.ndarray, pred: np.ndarray) -> float:
+        pass
+
+
+class ReLU(Activation):
+    @staticmethod
+    def activation(X: np.ndarray) -> np.ndarray:
+        return np.maximum(0, X)
+
+    @staticmethod
+    def grad(H: np.ndarray) -> np.ndarray:
+        return H > 0
+
+    @staticmethod
+    def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def loss(y: np.ndarray, pred: np.ndarray) -> float:
+        return 0
+
+
+class LeakyReLU(Activation):
+    @staticmethod
+    def activation(X: np.ndarray) -> np.ndarray:
+        return np.maximum(0.01 * X, X)
+
+    @staticmethod
+    def grad(H: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def loss(y: np.ndarray, pred: np.ndarray) -> float:
+        pass
+
+
+class PReLU(Activation):
+
+    @staticmethod
+    def activation(X: np.ndarray, alpha: float = 0.01) -> np.ndarray:
+        return np.maximum(alpha * X, X)
+
+    @staticmethod
+    def grad(H: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def loss(y: np.ndarray, pred: np.ndarray) -> float:
+        pass
+
+
+class ELU(Activation):
+    @staticmethod
+    def activation(X: np.ndarray, alpha: float = 0.01) -> np.ndarray:
+        A = X.copy()
+        A[A < 0] = alpha * (np.exp(X) - 1)
+        return A
+
+    @staticmethod
+    def grad(H: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def loss(y: np.ndarray, pred: np.ndarray) -> float:
+        pass
+
+
+class MaxOut(Activation):
+    @staticmethod
+    def activation(X: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def grad(H: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def loss(y: np.ndarray, pred: np.ndarray) -> float:
+        pass

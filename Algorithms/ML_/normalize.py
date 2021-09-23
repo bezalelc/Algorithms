@@ -40,3 +40,6 @@ def simple_normalize(data):
     div[div == 0] = 1
     data = (data - min_) / div
     return data, max_, min_
+
+
+

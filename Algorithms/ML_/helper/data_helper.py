@@ -1,3 +1,4 @@
+import numpy as np
 from pandas import DataFrame
 
 
@@ -59,3 +60,13 @@ def resize_images(path_read: str, formats: list[str], new_size: tuple, path_writ
             img = cv2.imread(file_img)
             img = cv2.resize(img, new_size)
             cv2.imwrite(os.path.join(path_write, os.path.split(file_img)[-1]), img)
+
+
+def split_train_val_test(X: np.ndarray, y: np.ndarray, val_size: float = 0.2, test_size: float = 0.2) -> tuple:
+    from sklearn.model_selection import train_test_split
+    train_val_size = 1. - test_size
+    X, Xt, y, Yt = train_test_split(X, y, train_size=train_val_size, random_state=42, stratify=y)
+    train_size = train_val_size - val_size
+    train_size = train_size / train_val_size
+    X, Xv, y, Yv = train_test_split(X, y, train_size=train_size, random_state=42, stratify=y)
+    return X, Xv, y, Yv, Xt, Yt
