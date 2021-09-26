@@ -227,7 +227,7 @@ class Sigmoid(Activation):
         m, k = pred.shape[0], pred.shape[1]
         K = np.arange(k)
         delta = pred - np.array(y[:, None] == K)
-        return delta
+        return delta / m
 
     @staticmethod
     def loss(y: np.ndarray, pred: np.ndarray) -> float:
@@ -272,12 +272,38 @@ class Softmax(Activation):
         m = pred.shape[0]
         delta = pred.copy()
         delta[np.arange(m), y] -= 1
-        return delta
+        return delta / m
 
     @staticmethod
     def loss(y: np.ndarray, pred: np.ndarray) -> float:
         m = pred.shape[0]
+        # pred[np.arange(m), y] += 1e-310
+
         return float(np.sum(-np.log(pred[np.arange(m), y]))) / m
+
+
+class SoftmaxStable(Activation):
+    @staticmethod
+    def activation(X: np.ndarray) -> np.ndarray:
+        Z = np.sum(np.exp(X), axis=1, keepdims=True)
+        Z = X - np.log(Z)
+        return Z
+
+    @staticmethod
+    def grad(H: np.ndarray) -> np.ndarray:
+        return H > 0
+
+    @staticmethod
+    def delta(y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        m = pred.shape[0]
+        delta = pred.copy()
+        delta[np.arange(m), y] -= 1
+        return delta / m
+
+    @staticmethod
+    def loss(y: np.ndarray, pred: np.ndarray) -> float:
+        m = pred.shape[0]
+        return -np.sum(pred[np.arange(m), y]) / m
 
 
 class Hinge(Activation):
@@ -296,7 +322,7 @@ class Hinge(Activation):
         delta = Hinge.predict_matrix(y, pred)
         delta[delta > 0] = 1
         delta[np.arange(m), y] = - delta.sum(axis=1)
-        return delta
+        return delta / m
 
     @staticmethod
     def loss(y: np.ndarray, pred: np.ndarray) -> float:

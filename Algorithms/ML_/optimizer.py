@@ -93,3 +93,6 @@ class Adam(Momentum, RMSProp):
     def t(self, t: int):
         self.__t = t
         self.rho_t, self.decay_rate_t = self.rho ** t, self.decay_rate ** t
+
+    # def f(self):
+    #     pass

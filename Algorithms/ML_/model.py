@@ -2,8 +2,9 @@ import numpy as np
 from regularization import Regularization, L2
 from activation import Activation, Softmax
 from optimizer import Optimizer, Vanilla
-from layer import Layer, Dense, WeightLayer
+from layer import Layer, Dense, WeightLayer, NormLayer, ActLayer, ComplexLayer, Dropout
 import metrics
+import time
 
 
 class Model:
@@ -141,71 +142,67 @@ class Regression(Model):
         # unpacked param
         m, n, k, layers = X.shape[0], X.shape[1], self.k, self.layers
         batch, epoch = min(batch, m), min(epoch, iter_)
-
         loss_history_t, loss_history_v = [], []
+        H_val = None
+
         for i in range(iter_):
             batch_idx = np.random.choice(m, batch, replace=False)
             X_, y_ = X[batch_idx], y[batch_idx]
 
             H = self.feedforward(X_)
             self.backpropagation(H, y_)
+            time.sleep(2)
 
             if return_loss:
-                loss_history_t.append(self.loss(X_, y_))
+                loss_history_t.append(self.loss(X_, y_, mode='test'))
                 if val:
-                    loss_history_v.append(self.loss(*val))
+                    H_val = self.feedforward(val[0], mode='test')
+                    loss_history_v.append(self.loss(*val, H_val[-1], mode='test'))
             if verbose and i % epoch == 0:
-                s = 'iteration %d / %d: loss %f acc %f' % (i, iter_, loss_history_t[-1], acc_func(y_, self.predict(X_)))
+                s = 'iteration %d / %d: loss %f acc %f' % (
+                    i + 1, iter_, loss_history_t[-1],
+                    acc_func(y_, self.predict(X_, self.feedforward(X_, mode='test')[-1])))
                 if val:
-                    s += ' val loss %f val acc %f' % (loss_history_v[-1], acc_func(val[1], self.predict(val[0])))
+                    s += ' val loss %f val acc %f' % \
+                         (loss_history_v[-1], acc_func(val[1], self.predict(val[0], H_val[-1])))
                 print(s)
 
         return loss_history_t, loss_history_v
 
-    def feedforward(self, X: np.ndarray) -> list[np.ndarray]:
+    def feedforward(self, X: np.ndarray, mode='train') -> list[np.ndarray]:
         layers = self.layers
 
         H = [X]
         for layer in layers:
-            H.append(layer.forward(H[-1]))
+            if isinstance(layer, (NormLayer, Dropout)):
+                H.append(layer.forward(H[-1], mode=mode))
+            else:
+                H.append(layer.forward(H[-1]))
+
         return H
 
-    def backpropagation(self, H, y):
-        m, layers = H[0].shape[0], self.layers
+    def backpropagation(self, H, y, mode='train'):
+        layers = self.layers
 
         delta = self.layers[-1].delta(y, H[-1])
-        for layer, h, i in zip(layers[::-1], H[:-1][::-1], range(len(layers))[::-1]):
-            delta = layer.backward(delta, h, return_delta=bool(i))
+        for layer, h, i in zip(layers[:-1][::-1], H[:-2][::-1], range(len(layers[:-1]))[::-1]):
+            if isinstance(layer, (NormLayer, Dropout)):
+                delta = layer.backward(delta, h, return_delta=bool(i), mode=mode)
+            else:
+                delta = layer.backward(delta, h, return_delta=bool(i))
 
-    def grad(self, H: list[np.ndarray], y: np.ndarray) -> list[np.ndarray]:
-        m, layers = H[0].shape[0], self.layers
+    def grad(self, H: list[np.ndarray], y: np.ndarray) -> list[dict]:
+        layers, grades = self.layers, []
 
-        delta = self.layers[-1].delta(y, H[-1])
-        dW = []
+        grades.append({'delta': self.layers[-1].delta(y, H[-1])})
+        for layer, h, i in zip(layers[:-1][::-1], H[:-2][::-1], range(len(layers[:-1][::-1]))):
+            grades.append(layer.grad(grades[-1]['delta'], h))
 
-        # for layer, h, i in zip(self.layers[1:][::-1], H[1:-1][::-1], range(len(layers) - 1)[::-1]):
-        #     w = layer.W
-        #     # print(i, len(layers) - 1)
-        #     # if i == len(layers) - 2 or not layers[i + 1].add_bias:
-        #     #     dW.insert(0, h.T @ delta)
-        #     #
-        #     #
-        #     # else:
-        #     #     dW.insert(0, np.hstack((np.ones((h.shape[0], 1)), h)).T @ delta)
-        #     dW.insert(0, np.hstack((np.ones((h.shape[0], 1)), h)).T @ delta)
-        #     dW[0][1:, :] += layer.lambda_ * w[1:, :]
-        #     dW[0] /= m
-        #     delta = delta @ w[1:, :].T * h * (1 - h)
-        #
-        # dW.insert(0, np.hstack((np.ones((H[0].shape[0], 1)), H[0])).T @ delta)
-        # dW[0][1:, :] += layers[0].lambda_ * layers[0].W[1:, :]
-        # dW[0] /= m
+        return grades[::-1]
 
-        return dW
-
-    def loss(self, X: np.ndarray, y: np.ndarray, pred: np.ndarray = None) -> float:
+    def loss(self, X: np.ndarray, y: np.ndarray, pred: np.ndarray = None, mode='train') -> float:
         if pred is None:
-            pred = self.feedforward(X)[-1]
+            pred = self.feedforward(X, mode=mode)[-1]  # , mode='train'
         m, Loss, layers = pred.shape[0], self.layers[-1].loss, self.layers
         J = Loss(y, pred)
 
@@ -216,8 +213,10 @@ class Regression(Model):
         # J += sum(layer.regularize() for layer in layers)
         return J
 
-    def predict(self, X: np.ndarray, threshold: float = 0.5) -> np.ndarray:
-        return np.argmax(self.feedforward(X)[-1], axis=1)
+    def predict(self, X: np.ndarray, pred: np.ndarray = None, threshold: float = 0.5) -> np.ndarray:
+        if pred is None:
+            pred = self.feedforward(X, mode='test')[-1]
+        return np.argmax(pred, axis=1)
 
     def __iadd__(self, other: Layer):
         if isinstance(other, Dense):
@@ -306,6 +305,6 @@ class SVM(Regression):
         self.n, self.k = X.shape[1], np.max(y) + 1
         if len(self.layers) == 0:
             self.layers.append(Dense(self.k, input_shape=(self.n,), alpha=self.alpha, lambda_=self.lambda_,
-                                     activation=self.act, reg=self.reg, opt=self.opt, eps=eps))
+                                     act=self.act, reg=self.reg, opt=self.opt, eps=eps))
 
         return super().train(X, y, val, iter_, batch, return_loss, verbose)

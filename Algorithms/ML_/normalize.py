@@ -42,4 +42,66 @@ def simple_normalize(data):
     return data, max_, min_
 
 
+class BatchNorm:
 
+    def __init__(self, dim: int, eps=1e-5, axis=0, momentum=.9) -> None:
+        self.gamma: np.ndarray = np.ones(dim)
+        self.beta: np.ndarray = np.zeros(dim)
+        self.mu = 0
+        self.var = 0
+        self.std = 0
+        self.z = 0
+        self.eps = eps
+        self.momentum = momentum
+        self.running_mu = np.zeros(dim, dtype=np.float64)
+        self.running_var = np.zeros(dim, dtype=np.float64)
+        self.axis = axis
+
+    def forward(self, X: np.ndarray, mode='train') -> np.ndarray:
+        gamma, beta, layer_norm, eps = self.gamma, self.beta, self.axis, self.eps
+
+        if mode == 'train':
+            layer_norm = self.axis
+
+            mu, var = X.mean(axis=0), X.var(axis=0)
+            std = var ** 0.5
+            z = (X - mu) / (std + eps)
+            out = gamma * z + beta
+            if layer_norm == 0:
+                momentum = self.momentum
+                self.running_mu = momentum * self.running_mu + (1 - momentum) * mu
+                self.running_var = momentum * self.running_var + (1 - momentum) * var
+
+            self.std, self.var, self.mu, self.z = std, var, mu, z
+
+        elif mode == 'test':
+            out = gamma * (X - self.running_mu) / (self.running_var + eps) ** 0.5 + beta
+
+        else:
+            raise ValueError('Invalid forward batch norm mode "%s"' % mode)
+
+        return out
+
+    def backward(self, delta: np.ndarray, X: np.ndarray, return_delta=True) -> Union[np.ndarray, tuple]:
+        grades = self.grad(delta, X)
+        d_beta = grades['d_beta']
+        d_gamma = grades['d_gamma']
+        dx = grades['dx']
+
+        return dx, d_gamma, d_beta
+
+    def delta(self, y: np.ndarray, pred: np.ndarray) -> np.ndarray:
+        pass
+
+    def loss(self, y: np.ndarray, pred: np.ndarray) -> float:
+        pass
+
+    def grad(self, delta: np.ndarray, X: np.ndarray) -> dict:
+        z, gamma, beta, mu, var, std = self.z, self.gamma, self.beta, self.mu, self.var, self.std
+        grades = {'d_beta': delta.sum(axis=0), 'd_gamma': np.sum(delta * z, axis=0)}
+
+        m = delta.shape[0]
+        df_dz = delta * gamma
+        grades['dx'] = (1 / (m * std)) * (m * df_dz - np.sum(df_dz, axis=0) - z * np.sum(df_dz * z, axis=0))
+
+        return grades
